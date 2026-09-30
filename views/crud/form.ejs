@@ -1,0 +1,100 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <h1><i class="bi <%= icon %>"></i> <%= title %></h1>
+</div>
+<% if (typeof errors !== 'undefined' && errors) { %><div class="alert alert-danger"><%= errors %></div><% } %>
+<div class="card">
+  <div class="card-body">
+    <form method="post" action="<%= base %><%= row.id ? '/' + row.id + '/edit' : '/new' %>" enctype="multipart/form-data">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="row g-3">
+        <% fields.forEach(function(f){ %>
+          <%
+            const val = row[f.name] !== undefined && row[f.name] !== null ? row[f.name] : (f.type === 'toggle' ? 1 : '');
+            let displayVal = val;
+            if (f.type === 'date') displayVal = val ? U.jDateEn(val) : '';
+            if (f.type === 'lines') displayVal = val ? JSON.parse(val || '[]').join('\n') : '';
+            const opts = (f.type === 'select' || f.type === 'employee' || f.type === 'department') ? (f.options || {}) : null;
+            const isOptObj = opts && !Array.isArray(opts) && typeof opts === 'object' && !(opts instanceof Array) && Object.keys(opts).length && Object.keys(opts)[0] !== '0';
+            const optEntries = opts ? (Array.isArray(opts) ? opts : Object.entries(opts)) : [];
+          %>
+          <div class="col-<%= f.col && f.col >= 12 ? 12 : (f.col ? f.col : 6) %> col-md-<%= f.col || 6 %>">
+            <% if (f.type === 'toggle') { %>
+              <div class="form-check form-switch pt-2">
+                <input class="form-check-input" type="checkbox" value="1" id="f_<%= f.name %>" name="<%= f.name %>" <%= val==1?'checked':'' %>>
+                <label class="form-check-label form-label" for="f_<%= f.name %>"><%= f.label %></label>
+                <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+              </div>
+            <% } else if (f.type === 'weekdays') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <div class="d-flex flex-wrap gap-3 pt-1">
+                <% ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'].forEach(function(dn, i){ %>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="<%= f.name %>" value="<%= i %>" id="wd_<%= i %>" <%= String(val||'').split(',').includes(String(i)) ? 'checked' : '' %>>
+                    <label class="form-check-label" for="wd_<%= i %>" style="font-size:13px"><%= dn %></label>
+                  </div>
+                <% }) %>
+              </div>
+              <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+            <% } else if (f.type === 'textarea') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <textarea class="form-control" name="<%= f.name %>" rows="<%= f.rows || 3 %>"><%= displayVal %></textarea>
+              <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+            <% } else if (f.type === 'lines') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <textarea class="form-control" name="<%= f.name %>" rows="<%= f.rows || 5 %>" style="line-height:2.2"><%= displayVal %></textarea>
+              <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+            <% } else if (f.type === 'select' || f.type === 'employee' || f.type === 'department') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <select class="form-select" name="<%= f.name %>" <%= f.required ? 'required' : '' %>>
+                <option value="">— انتخاب کنید —</option>
+                <% optEntries.forEach(function(en){ %>
+                  <option value="<%= en[0] %>" <%= String(val)==String(en[0]) ? 'selected' : '' %>><%= en[1] %></option>
+                <% }) %>
+              </select>
+              <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+            <% } else if (f.type === 'file') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <input type="file" class="form-control" name="file" <%= (!row.id && f.required) ? 'required' : '' %>>
+              <% if (val) { %>
+                <small class="form-text d-block mt-1">فایل فعلی: <code dir="ltr"><%= val %></code> (برای حفظ، فایل جدید انتخاب نکنید)</small>
+                <input type="hidden" name="existing_file" value="<%= val %>">
+              <% } %>
+            <% } else if (f.type === 'date') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <input type="text" class="form-control jdate" name="<%= f.name %>" value="<%= displayVal %>" placeholder="۱۴۰۳/۰۱/۰۱" <%= f.required ? 'required' : '' %>>
+              <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+            <% } else if (f.type === 'month') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <input type="text" class="form-control jmonth" name="<%= f.name %>" value="<%= displayVal %>" placeholder="۱۴۰۳/۰۵" <%= f.required ? 'required' : '' %>>
+              <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+            <% } else if (f.type === 'color') { %>
+              <label class="form-label"><%= f.label %></label>
+              <input type="color" class="form-control form-control-color w-100" name="<%= f.name %>" value="<%= val || '#0d6efd' %>">
+            <% } else if (f.type === 'number') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <input type="number" class="form-control" name="<%= f.name %>" value="<%= displayVal %>" step="any" <%= f.required ? 'required' : '' %>>
+              <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+            <% } else if (f.type === 'money') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <input type="text" class="form-control" name="<%= f.name %>" value="<%= displayVal ? U.faNum(Number(displayVal).toLocaleString('en-US')) : '' %>" placeholder="0" <%= f.required ? 'required' : '' %>>
+              <div class="form-text">اعداد با فرمت دلخواه وارد شود؛ جداکننده هزارگان خودکار پاک می‌شود.</div>
+            <% } else if (f.type === 'time') { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <input type="time" class="form-control" name="<%= f.name %>" value="<%= displayVal %>" <%= f.required ? 'required' : '' %> dir="ltr">
+            <% } else { %>
+              <label class="form-label <%= f.required ? 'req' : '' %>"><%= f.label %></label>
+              <input type="text" class="form-control" name="<%= f.name %>" value="<%= displayVal %>" <%= f.required ? 'required' : '' %>>
+              <% if (f.help) { %><div class="form-text"><%= f.help %></div><% } %>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+      <div class="d-flex gap-2 mt-4 pt-3 border-top">
+        <button class="btn btn-primary px-4" style="font-weight:700"><i class="bi bi-check-lg me-1"></i> ذخیره</button>
+        <a class="btn btn-outline-secondary" href="<%= backUrl %>">انصراف</a>
+      </div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

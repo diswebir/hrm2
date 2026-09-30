@@ -1,0 +1,49 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-cloud-arrow-down"></i> پشتیبان‌گیری و بازیابی</h1>
+    <div class="subtitle">کل دیتابیس سامانه یک فایل SQLite است</div>
+  </div>
+</div>
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-download"></i> دانلود نسخه پشتیبان</div>
+      <div class="card-body">
+        <p style="font-size:13.5px" class="text-muted2">
+          یک کپی کامل از فایل دیتابیس (<code dir="ltr">hrm.sqlite</code>) دانلود می‌شود. توصیه می‌شود دوره‌ای (هفتگی) نسخه بگیرید و در جای امن نگه دارید.
+        </p>
+        <a class="btn btn-primary" href="/backup/download"><i class="bi bi-cloud-arrow-down me-1"></i> دانلود نسخه پشتیبان</a>
+        <hr>
+        <b style="font-size:13px">فایل‌های فعلی پوشه data:</b>
+        <ul class="list-group list-group-flush mt-2">
+          <% files.forEach(function(f){ %>
+            <li class="list-group-item bg-transparent d-flex justify-content-between" style="font-size:12.5px">
+              <code dir="ltr"><%= f.name %></code>
+              <span class="text-muted2"><%= U.faNum(Math.round(f.size/1024)) %> کیلوبایت</span>
+            </li>
+          <% }) %>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100 border-warning">
+      <div class="card-header text-warning"><i class="bi bi-arrow-counterclockwise"></i> بازیابی از نسخه پشتیبان</div>
+      <div class="card-body">
+        <div class="alert alert-warning" style="font-size:13px">
+          <b>توجه:</b> با بازیابی، همه داده‌های فعلی با محتوای فایل پشتیبان جایگزین می‌شود. پس از بازیابی، اپلیکیشن را از cPanel یک‌بار ری‌استارت کنید.
+        </div>
+        <form method="post" action="/backup/restore" enctype="multipart/form-data">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <input type="file" class="form-control mb-3" name="backup" accept=".sqlite,.db,.sqlite3" required>
+          <button class="btn btn-warning" onclick="this.form.confirm.value='yes'" data-confirm="همه داده‌های فعلی جایگزین می‌شوند. مطمئن هستید؟">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> بازیابی و جایگزینی
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

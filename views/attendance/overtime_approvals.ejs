@@ -1,0 +1,38 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-check2-square"></i> تایید اضافه‌کاری</h1>
+    <div class="subtitle">درخواست‌های در انتظار تصمیم</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>کارمند</th><th>تاریخ</th><th>ساعت</th><th>دلیل</th><th>وضعیت</th><th style="width:300px">تصمیم</th></tr></thead>
+      <tbody>
+        <% if (!rows.length) { %><tr><td colspan="6" class="text-center text-muted2 py-4">درخواستی وجود ندارد.</td></tr><% } %>
+        <% rows.forEach(function(o){ %>
+          <tr class="<%= o.status==='pending' ? 'table-warning' : '' %>">
+            <td><b><%= o.first_name %> <%= o.last_name %></b><br><small class="text-muted2"><%= U.faNum(o.code) %></small></td>
+            <td><%= U.jDate(o.date) %></td>
+            <td><%= U.faNum(o.hours) %></td>
+            <td style="font-size:12.5px"><%= o.reason || '—' %></td>
+            <td><span class="badge bg-<%= HH.badgeClass(o.status) %>"><%= U.label(o.status) %></span>
+              <% if (o.decision_note) { %><small class="d-block text-muted2"><%= o.decision_note %></small><% } %></td>
+            <td>
+              <% if (o.status === 'pending') { %>
+                <form class="d-flex gap-2" method="post" action="/overtime/<%= o.id %>/decide">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <input type="text" class="form-control form-control-sm" name="note" placeholder="یادداشت (اختیاری)">
+                  <button class="btn btn-sm btn-success" name="decision" value="approve"><i class="bi bi-check-lg"></i> تایید</button>
+                  <button class="btn btn-sm btn-outline-danger" name="decision" value="reject"><i class="bi bi-x-lg"></i> رد</button>
+                </form>
+              <% } else { %><small class="text-muted2">—</small><% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+<%- include('../partials/layout_bottom') %>

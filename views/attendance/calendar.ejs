@@ -1,0 +1,52 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-calendar3"></i> تقویم حضور</h1>
+    <div class="subtitle"><%= emp ? emp.first_name + ' ' + emp.last_name : '' %> — <%= monthName %> <%= U.faNum(jy) %></div>
+  </div>
+  <form class="d-flex gap-2" method="get" action="/attendance/calendar">
+    <select class="form-select form-select-sm" name="employee">
+      <% emps.forEach(function(e){ %><option value="<%= e.id %>" <%= emp && emp.id===e.id?'selected':'' %>><%= e.first_name %> <%= e.last_name %></option><% }) %>
+    </select>
+    <select class="form-select form-select-sm" name="jm" style="max-width:130px">
+      <% U.FA_MONTHS.forEach(function(m, i){ %><option value="<%= i+1 %>" <%= jm===i+1?'selected':'' %>><%= m %></option><% }) %>
+    </select>
+    <input type="number" class="form-control form-control-sm" name="jy" value="<%= jy %>" style="max-width:100px">
+    <button class="btn btn-sm btn-primary">نمایش</button>
+  </form>
+</div>
+<div class="card p-3">
+  <div class="cal-grid">
+    <% ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'].forEach(function(d){ %><div class="cal-dow"><%= d %></div><% }) %>
+    <%
+      if (days.length) {
+        const g0 = U.toGregorian(days[0].jd.jy, days[0].jd.jm, 1);
+        const firstDow = (new Date(Date.UTC(g0.gy, g0.gm - 1, g0.gd)).getUTCDay() + 1) % 7;
+        for (let x = 0; x < firstDow; x++) { %><div class="cal-cell empty"></div><% }
+      }
+    %>
+    <% days.forEach(function(d, i){ %>
+      <div class="cal-cell <%= d.weekend ? 'weekend' : '' %> <%= d.holiday ? 'holiday' : '' %>">
+        <div class="cal-day-num"><%= U.faNum(d.jd.jd) %></div>
+        <% if (d.rec) { %>
+          <div class="att-<%= d.rec.status === 'present' ? 'p' : (d.rec.status === 'absent' ? 'a' : (d.rec.status === 'leave' ? 'l' : 'm')) %>">
+            <%= U.label(d.rec.status) %>
+            <% if (d.rec.check_in) { %><br><small><%= U.faNum(d.rec.check_in) %><%= d.rec.check_out ? ' - ' + U.faNum(d.rec.check_out) : '' %></small><% } %>
+            <% if (d.rec.late_minutes > 0) { %><br><small>تأخیر <%= U.faNum(d.rec.late_minutes) %> د</small><% } %>
+          </div>
+        <% } else if (d.weekend) { %><small class="text-muted2">آخر هفته</small>
+        <% } else if (d.holiday) { %><small class="text-muted2">تعطیل رسمی</small>
+        <% } %>
+      </div>
+    <% }) %>
+  </div>
+  <hr>
+  <div class="d-flex gap-3 flex-wrap" style="font-size:12px">
+    <span><span class="att-p">●</span> حاضر</span>
+    <span><span class="att-a">●</span> غایب</span>
+    <span><span class="att-l">●</span> مرخصی</span>
+    <span><span class="att-m">●</span> مأموریت</span>
+    <span class="text-muted2">راهنما: روزهای نارنجی = جمعه یا تعطیل رسمی</span>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

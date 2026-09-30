@@ -1,0 +1,35 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-diagram-2"></i> چارت سازمانی</h1>
+    <div class="subtitle">درخت واحدهای سازمانی با تعداد کارکنان فعال</div>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="/departments"><i class="bi bi-gear me-1"></i> مدیریت دپارتمان‌ها</a>
+</div>
+<%
+  function renderNode(dept, all, depth) {
+    const children = all.filter(d => d.parent_id === dept.id);
+    let html = '<div class="col-12 col-md-6 col-xl-4 mb-3">';
+    html += `<div class="card h-100"><div class="card-body py-3">`;
+    html += `<div class="d-flex justify-content-between align-items-start">`;
+    html += `<div><b style="font-size:14.5px">${dept.name}</b>`;
+    if (dept.mgr_first) html += `<div class="subtitle" style="margin-top:2px"><i class="bi bi-person-badge me-1"></i>مدیر: ${dept.mgr_first} ${dept.mgr_last}</div>`;
+    html += `<span class="badge bg-primary-subtle text-primary mt-1">${U.faNum(dept.emp_count)} نفر</span></div>`;
+    html += `<i class="bi bi-diagram-3" style="font-size:26px;color:#4f46e5;opacity:.35"></i></div>`;
+    html += `</div></div></div>`;
+    children.forEach(ch => { html += renderNode(ch, all, depth + 1); });
+    return html;
+  }
+  const roots = depts.filter(d => !d.parent_id);
+%>
+<% if (!depts.length) { %>
+<div class="card"><div class="empty-state"><i class="bi bi-diagram-3"></i>دپارتمانی ثبت نشده است.</div></div>
+<% } else { %>
+<div class="card p-3"><div class="row">
+  <% roots.forEach(function(rd){ %><%- renderNode(rd, depts, 0) %><% }) %>
+  <% depts.filter(d=>d.parent_id).forEach(function(d){ if(!depts.find(p=>p.id===d.parent_id)){ %>
+    <%- renderNode(d, depts, 0) %>
+  <% } }) %>
+</div></div>
+<% } %>
+<%- include('../partials/layout_bottom') %>

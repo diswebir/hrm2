@@ -1,0 +1,31 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-cash-stack"></i> گزارش هزینه حقوق</h1>
+    <div class="subtitle">لیست‌های نهایی‌شده (تا ۲۴ ماه اخیر)</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body p-0">
+    <% if (!rows.length) { %><div class="empty-state"><i class="bi bi-wallet2"></i>لیست نهایی‌شده‌ای وجود ندارد.</div>
+    <% } else { %><div class="table-wrap p-3"><table class="table table-hover align-middle" data-sortable>
+      <thead><tr><th>ماه</th><th>تعداد</th><th>جمع پایه</th><th>اضافه‌کاری</th><th>مزایا</th><th>بیمه</th><th>مالیات</th><th>وام</th><th>خالص کل</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function(r){ const j = r.month.split('-'); %>
+          <tr>
+            <td><b><%= U.FA_MONTHS[parseInt(j[1],10)-1] %> <%= U.faNum(j[0]) %></b></td>
+            <td><%= U.faNum(r.c) %> نفر</td>
+            <td><%= U.moneyPlain(r.base) %></td>
+            <td><%= U.moneyPlain(r.ot) %></td>
+            <td><%= U.moneyPlain(r.allowances) %></td>
+            <td><%= U.moneyPlain(r.insurance) %></td>
+            <td><%= U.moneyPlain(r.tax) %></td>
+            <td><%= U.moneyPlain(r.loan) %></td>
+            <td><b class="text-success"><%= U.moneyPlain(r.net) %></b></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table></div><% } %>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

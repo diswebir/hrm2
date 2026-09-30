@@ -1,0 +1,36 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-diagram-3"></i> ترکیب نیروی انسانی</h1>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="/reports/headcount?csv=1"><i class="bi bi-download me-1"></i> خروجی CSV</a>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card h-100">
+    <div class="card-header"><i class="bi bi-diagram-3"></i> به‌تفکیک دپارتمان</div>
+    <div class="card-body p-0"><table class="table align-middle" data-sortable>
+      <thead><tr><th>واحد</th><th>تعداد</th></tr></thead>
+      <tbody><% byDept.forEach(function(x){ %>
+        <tr><td><%= x.name %></td><td><b><%= U.faNum(x.c) %></b></td></tr>
+      <% }) %></tbody></table></div></div></div>
+  <div class="col-lg-6"><div class="card h-100">
+    <div class="card-header"><i class="bi bi-briefcase"></i> نوع همکاری</div>
+    <div class="card-body p-0"><table class="table">
+      <thead><tr><th>نوع</th><th>تعداد</th></tr></thead>
+      <tbody><% byType.forEach(function(x){ %>
+        <tr><td><%= U.label(x.contract_type) %></td><td><b><%= U.faNum(x.c) %></b></td></tr>
+      <% }) %></tbody></table></div></div></div>
+  <div class="col-lg-6"><div class="card h-100">
+    <div class="card-header"><i class="bi bi-people"></i> جنسیت</div>
+    <div class="card-body p-0"><table class="table">
+      <tbody><% byGender.forEach(function(x){ %>
+        <tr><td><%= U.label(x.gender) %></td><td><b><%= U.faNum(x.c) %></b></td></tr>
+      <% }) %></tbody></table></div></div></div>
+  <div class="col-lg-6"><div class="card h-100">
+    <div class="card-header"><i class="bi bi-buildings"></i> شعب</div>
+    <div class="card-body p-0"><table class="table">
+      <tbody><% byBranch.forEach(function(x){ %>
+        <tr><td><%= x.name %></td><td><b><%= U.faNum(x.c) %></b></td></tr>
+      <% }) %></tbody></table></div></div></div>
+</div>
+<%- include('../partials/layout_bottom') %>

@@ -1,0 +1,338 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div class="d-flex align-items-center gap-3 flex-wrap">
+    <% if (e.photo) { %><img src="/uploads/<%= e.photo %>" class="avatar-lg" alt="">
+    <% } else { %><span class="avatar-lg"><%= e.first_name.charAt(0) %></span><% } %>
+    <div>
+      <h1 style="font-size:22px"><%= e.first_name %> <%= e.last_name %></h1>
+      <div class="subtitle">
+        کد <%= U.faNum(e.code) %> • <%= e.desig_name || '—' %> • <%= e.dept_name || '—' %>
+        <span class="badge bg-<%= HH.badgeClass(e.status) %> ms-1"><%= U.label(e.status) %></span>
+      </div>
+    </div>
+  </div>
+  <div class="d-flex gap-2 no-print">
+    <a class="btn btn-outline-secondary btn-sm" href="/employees/<%= e.id %>/print"><i class="bi bi-printer me-1"></i> چاپ پرونده</a>
+    <a class="btn btn-primary btn-sm" href="/employees/<%= e.id %>/edit"><i class="bi bi-pencil me-1"></i> ویرایش</a>
+    <% if (user.role === 'admin') { %>
+    <form method="post" action="/employees/<%= e.id %>/delete" data-confirm="همه سوابق این کارمند حذف می‌شود. مطمئن هستید؟">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+    </form>
+    <% } %>
+  </div>
+</div>
+
+<ul class="nav nav-pills gap-1 mb-3 flex-wrap no-print" style="font-size:13px">
+  <% [['info','مشخصات','bi-person'],['job','شغل و قراردادها','bi-briefcase'],['edu','تحصیلات','bi-mortarboard'],['skills','مهارت‌ها','bi-stars'],['family','خانواده و تماس','bi-people'],['documents','مدارک','bi-folder2'],['att','حضور و مرخصی','bi-clock-history'],['payroll','حقوق','bi-cash-stack'],['assets','اموال','bi-box-seam'],['perf','اهداف و آموزش','bi-bullseye'],['checklist','چک‌لیست','bi-list-check']].forEach(function(t){ %>
+    <li class="nav-item"><a class="nav-link <%= tab===t[0]?'active':'' %>" href="?tab=<%= t[0] %>"><i class="bi <%= t[2] %> me-1"></i><%= t[1] %></a></li>
+  <% }) %>
+</ul>
+
+<% if (tab === 'info') { %>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-person"></i> مشخصات فردی</div>
+    <div class="card-body"><table class="table table-sm table-borderless mb-0">
+      <tr><td class="text-muted2" style="width:40%">نام پدر</td><td><%= e.father_name || '—' %></td></tr>
+      <tr><td class="text-muted2">کد ملی</td><td dir="ltr" style="text-align:right"><%= e.national_id || '—' %></td></tr>
+      <tr><td class="text-muted2">تاریخ تولد</td><td><%= U.jDate(e.birth_date) %></td></tr>
+      <tr><td class="text-muted2">جنسیت</td><td><%= U.label(e.gender) %></td></tr>
+      <tr><td class="text-muted2">وضعیت تأهل</td><td><%= U.label(e.marital_status) %> <%= e.children_count ? '— ' + U.faNum(e.children_count) + ' فرزند' : '' %></td></tr>
+      <tr><td class="text-muted2">تلفن</td><td dir="ltr" style="text-align:right"><%= e.phone || '—' %></td></tr>
+      <tr><td class="text-muted2">ایمیل</td><td dir="ltr" style="text-align:right"><%= e.email || '—' %></td></tr>
+      <tr><td class="text-muted2">آدرس</td><td><%= e.address || '—' %></td></tr>
+    </table></div></div></div>
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-info-circle"></i> خلاصه شغلی</div>
+    <div class="card-body"><table class="table table-sm table-borderless mb-0">
+      <tr><td class="text-muted2" style="width:40%">شعبه</td><td><%= e.branch_name || '—' %></td></tr>
+      <tr><td class="text-muted2">مدیر مستقیم</td><td><%= e.mgr_first ? e.mgr_first + ' ' + e.mgr_last : '—' %></td></tr>
+      <tr><td class="text-muted2">شیفت</td><td><%= e.shift_name || 'اداری پیش‌فرض' %></td></tr>
+      <tr><td class="text-muted2">تاریخ استخدام</td><td><%= U.jDate(e.hire_date) %></td></tr>
+      <tr><td class="text-muted2">نوع همکاری</td><td><%= U.label(e.contract_type) %></td></tr>
+      <tr><td class="text-muted2">پایان قرارداد</td><td><%= U.jDate(e.contract_end) %></td></tr>
+      <tr><td class="text-muted2">بانک / حساب</td><td><%= e.bank_name || '—' %> <span dir="ltr"><%= e.bank_account || '' %></span></td></tr>
+      <tr><td class="text-muted2">شماره بیمه</td><td dir="ltr" style="text-align:right"><%= e.insurance_no || '—' %></td></tr>
+      <% if (e.termination_reason) { %><tr><td class="text-muted2">دلیل خاتمه</td><td><%= e.termination_reason %></td></tr><% } %>
+    </table>
+    <% if (e.notes) { %><div class="alert alert-light border mt-2 mb-0" style="font-size:12.5px"><b>یادداشت:</b> <%= e.notes %></div><% } %>
+    </div></div></div>
+</div>
+<% } %>
+
+<% if (tab === 'job') { %>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-file-earmark-text"></i> قراردادها</div>
+    <div class="card-body p-0"><table class="table align-middle">
+      <thead><tr><th>عنوان</th><th>بازه</th><th>مبلغ</th><th>وضعیت</th><th>فایل</th></tr></thead>
+      <tbody>
+        <% if (!contracts.length) { %><tr><td colspan="5" class="text-center text-muted2 py-3">قراردادی ثبت نشده — از منوی «قراردادها» اضافه کنید.</td></tr><% } %>
+        <% contracts.forEach(function(c){ %>
+          <tr><td><%= c.title %><br><small class="text-muted2"><%= U.label(c.type) %></small></td>
+          <td style="font-size:12px"><%= U.jDate(c.start_date) %> تا <%= U.jDate(c.end_date) %></td>
+          <td><%= U.money(c.salary, currency) %></td>
+          <td><span class="badge bg-<%= c.status==='active'?'success':'secondary' %>"><%= c.status==='active'?'فعال':U.label(c.status) %></span></td>
+          <td><% if (c.file_path) { %><a href="/files/contract/<%= c.id %>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-download"></i></a><% } else { %>—<% } %></td></tr>
+        <% }) %>
+      </tbody></table></div></div></div>
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-clock-history"></i> سوابق شغلی (کارگزینی)</div>
+    <div class="card-body p-0">
+      <table class="table align-middle">
+        <thead><tr><th>عنوان</th><th>واحد</th><th>از</th><th>تا</th><th></th></tr></thead>
+        <tbody>
+          <% if (!history.length) { %><tr><td colspan="5" class="text-center text-muted2 py-3">سابقه‌ای ثبت نشده.</td></tr><% } %>
+          <% history.forEach(function(h){ %>
+            <tr><td><%= h.title %><br><small class="text-muted2"><%= U.money(h.salary, currency) %></small></td><td><%= h.dept_name || '—' %></td>
+            <td style="font-size:12px"><%= U.jDate(h.from_date) %></td><td style="font-size:12px"><%= h.to_date ? U.jDate(h.to_date) : 'تاکنون' %></td>
+            <td><form method="post" action="/employees/<%= e.id %>/history/<%= h.id %>/delete?tab=job" data-confirm="حذف شود؟">
+              <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash"></i></button></form></td></tr>
+          <% }) %>
+        </tbody></table>
+      <div class="p-3 border-top">
+        <form method="post" action="/employees/<%= e.id %>/history" class="row g-2">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="tab" value="job">
+          <div class="col-md-4"><input class="form-control form-control-sm" name="title" placeholder="عنوان جدید (مثلاً ارتقا به سرپرست)" required></div>
+          <div class="col-md-3"><input class="form-control form-control-sm jdate" name="from_date" placeholder="از تاریخ"></div>
+          <div class="col-md-3"><input class="form-control form-control-sm" name="salary" placeholder="حقوق" dir="ltr"></div>
+          <div class="col-md-2"><button class="btn btn-sm btn-primary w-100">افزودن</button></div>
+        </form>
+      </div>
+    </div></div></div>
+</div>
+<% } %>
+
+<% if (tab === 'edu') { %>
+<div class="card"><div class="card-header"><i class="bi bi-mortarboard"></i> سوابق تحصیلی</div>
+  <div class="card-body p-0"><table class="table align-middle">
+    <thead><tr><th>مقطع</th><th>رشته</th><th>دانشگاه</th><th>سال</th><th>معدل</th><th></th></tr></thead>
+    <tbody>
+      <% if (!education.length) { %><tr><td colspan="6" class="text-center text-muted2 py-3">ثبت نشده است.</td></tr><% } %>
+      <% education.forEach(function(x){ %>
+        <tr><td><%= x.degree %></td><td><%= x.field %></td><td><%= x.institute %></td><td><%= U.faNum(x.year) %></td><td><%= U.faNum(x.gpa) %></td>
+        <td><form method="post" action="/employees/<%= e.id %>/education/<%= x.id %>/delete?tab=edu" data-confirm="حذف شود؟">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash"></i></button></form></td></tr>
+      <% }) %>
+    </tbody></table>
+    <div class="p-3 border-top">
+      <form method="post" action="/employees/<%= e.id %>/education" class="row g-2">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="tab" value="edu">
+        <div class="col-md-2"><input class="form-control form-control-sm" name="degree" placeholder="مقطع" required></div>
+        <div class="col-md-3"><input class="form-control form-control-sm" name="field" placeholder="رشته"></div>
+        <div class="col-md-3"><input class="form-control form-control-sm" name="institute" placeholder="دانشگاه/مؤسسه"></div>
+        <div class="col-md-2"><input class="form-control form-control-sm" name="year" placeholder="سال"></div>
+        <div class="col-md-1"><input class="form-control form-control-sm" name="gpa" placeholder="معدل"></div>
+        <div class="col-md-1"><button class="btn btn-sm btn-primary w-100">+</button></div>
+      </form>
+    </div>
+  </div></div>
+<% } %>
+
+<% if (tab === 'skills') { %>
+<div class="card"><div class="card-header"><i class="bi bi-stars"></i> مهارت‌ها</div>
+  <div class="card-body p-0"><table class="table align-middle">
+    <thead><tr><th>مهارت</th><th style="width:40%">سطح تسلط</th><th>یادداشت</th><th></th></tr></thead>
+    <tbody>
+      <% if (!skills.length) { %><tr><td colspan="4" class="text-center text-muted2 py-3">مهارتی ثبت نشده است.</td></tr><% } %>
+      <% skills.forEach(function(x){ %>
+        <tr><td><b><%= x.skill %></b></td>
+        <td><div class="progress" style="height:8px"><div class="progress-bar bg-success" style="width:<%= x.level*20 %>%"></div></div>
+          <small class="text-muted2"><%= U.faNum(x.level) %> از ۵</small></td>
+        <td><%= x.note || '—' %></td>
+        <td><form method="post" action="/employees/<%= e.id %>/skills/<%= x.id %>/delete?tab=skills" data-confirm="حذف شود؟">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash"></i></button></form></td></tr>
+      <% }) %>
+    </tbody></table>
+    <div class="p-3 border-top">
+      <form method="post" action="/employees/<%= e.id %>/skills" class="row g-2">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="tab" value="skills">
+        <div class="col-md-4"><input class="form-control form-control-sm" name="skill" placeholder="مهارت" required></div>
+        <div class="col-md-2"><select class="form-select form-select-sm" name="level"><option value="1">۱</option><option value="2">۲</option><option value="3" selected>۳</option><option value="4">۴</option><option value="5">۵</option></select></div>
+        <div class="col-md-4"><input class="form-control form-control-sm" name="note" placeholder="یادداشت"></div>
+        <div class="col-md-2"><button class="btn btn-sm btn-primary w-100">افزودن</button></div>
+      </form>
+    </div>
+  </div></div>
+<% } %>
+
+<% if (tab === 'family') { %>
+<div class="card"><div class="card-header"><i class="bi bi-people"></i> اعضای خانواده و تماس اضطراری</div>
+  <div class="card-body p-0"><table class="table align-middle">
+    <thead><tr><th>نام</th><th>نسبت</th><th>تلفن</th><th>تماس اضطراری</th><th></th></tr></thead>
+    <tbody>
+      <% if (!contacts.length) { %><tr><td colspan="5" class="text-center text-muted2 py-3">ثبت نشده است.</td></tr><% } %>
+      <% contacts.forEach(function(x){ %>
+        <tr><td><%= x.name %></td><td><%= x.relation || '—' %></td><td dir="ltr" style="text-align:right"><%= x.phone %></td>
+        <td><%= x.is_emergency ? '<span class="badge bg-danger">اضطراری</span>' : '—' %></td>
+        <td><form method="post" action="/employees/<%= e.id %>/contacts/<%= x.id %>/delete?tab=family" data-confirm="حذف شود؟">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash"></i></button></form></td></tr>
+      <% }) %>
+    </tbody></table>
+    <div class="p-3 border-top">
+      <form method="post" action="/employees/<%= e.id %>/contacts" class="row g-2">
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="tab" value="family">
+        <div class="col-md-3"><input class="form-control form-control-sm" name="name" placeholder="نام" required></div>
+        <div class="col-md-3"><input class="form-control form-control-sm" name="relation" placeholder="نسبت (همسر، والد...)"></div>
+        <div class="col-md-3"><input class="form-control form-control-sm" name="phone" placeholder="تلفن" dir="ltr"></div>
+        <div class="col-md-2 form-check ms-2 pt-2"><input class="form-check-input" type="checkbox" name="is_emergency" value="1" id="emg"><label class="form-check-label" for="emg" style="font-size:12.5px">تماس اضطراری</label></div>
+        <div class="col-md-1"><button class="btn btn-sm btn-primary w-100">+</button></div>
+      </form>
+    </div>
+  </div></div>
+<% } %>
+
+<% if (tab === 'documents') { %>
+<div class="card"><div class="card-header"><i class="bi bi-folder2"></i> مدارک کارمند</div>
+  <div class="card-body p-0"><table class="table align-middle">
+    <thead><tr><th>عنوان</th><th>دسته</th><th>صدور</th><th>انقضا</th><th>فایل</th><th></th></tr></thead>
+    <tbody>
+      <% if (!documents.length) { %><tr><td colspan="6" class="text-center text-muted2 py-3">مدرکی آپلود نشده است.</td></tr><% } %>
+      <% documents.forEach(function(d){ const expSoon = d.expiry_date && d.expiry_date <= U.addDaysIso(today, 30); %>
+        <tr><td><%= d.title %></td><td><%= U.label(d.category) %></td>
+        <td style="font-size:12px"><%= U.jDate(d.issue_date) %></td>
+        <td style="font-size:12px"><%= U.jDate(d.expiry_date) %> <%= expSoon ? '<span class="badge bg-warning text-dark">نزدیک انقضا</span>' : '' %></td>
+        <td><a href="/files/edoc/<%= d.id %>" class="btn btn-sm btn-outline-secondary btn-icon" title="دانلود"><i class="bi bi-download"></i></a></td>
+        <td><form method="post" action="/employee-documents/<%= d.id %>/delete" data-confirm="مدرک حذف شود؟">
+          <input type="hidden" name="_csrf" value="<%= csrf %>"><button class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash"></i></button></form></td></tr>
+      <% }) %>
+    </tbody></table>
+    <div class="p-3 border-top">
+      <form method="post" action="/employees/<%= e.id %>/documents" enctype="multipart/form-data" class="row g-2">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="col-md-3"><input class="form-control form-control-sm" name="title" placeholder="عنوان مدرک" required></div>
+        <div class="col-md-2"><select class="form-select form-select-sm" name="category"><option value="id">هویتی</option><option value="edu">تحصیلی</option><option value="cert">گواهینامه</option><option value="job">شغلی</option><option value="other">سایر</option></select></div>
+        <div class="col-md-2"><input type="text" class="form-control form-control-sm jdate" name="issue_date" placeholder="تاریخ صدور"></div>
+        <div class="col-md-2"><input type="text" class="form-control form-control-sm jdate" name="expiry_date" placeholder="تاریخ انقضا"></div>
+        <div class="col-md-2"><input type="file" class="form-control form-control-sm" name="file" required></div>
+        <div class="col-md-1"><button class="btn btn-sm btn-primary w-100">آپلود</button></div>
+      </form>
+    </div>
+  </div></div>
+<% } %>
+
+<% if (tab === 'att') { %>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card h-100"><div class="card-header"><i class="bi bi-graph-up"></i> آمار ۳۰ روز اخیر</div>
+      <div class="card-body">
+        <% const s = attendanceStats.month || {}; %>
+        <table class="table table-sm table-borderless mb-0">
+          <tr><td class="text-muted2">حاضر</td><td><b class="att-p"><%= U.faNum(s.present || 0) %></b></td></tr>
+          <tr><td class="text-muted2">غایب</td><td><b class="att-a"><%= U.faNum(s.absent || 0) %></b></td></tr>
+          <tr><td class="text-muted2">مرخصی</td><td><b class="att-l"><%= U.faNum(s.leaves || 0) %></b></td></tr>
+          <tr><td class="text-muted2">جمع تأخیر</td><td><%= U.faNum(s.late || 0) %> دقیقه</td></tr>
+          <tr><td class="text-muted2">جمع اضافه‌کاری</td><td><%= U.faNum(Math.round((s.ot || 0)/60)) %> ساعت</td></tr>
+        </table>
+        <a href="/attendance/calendar?employee=<%= e.id %>" class="btn btn-outline-primary btn-sm mt-2"><i class="bi bi-calendar3 me-1"></i> تقویم حضور</a>
+        <a href="/attendance/report?employee=<%= e.id %>" class="btn btn-outline-secondary btn-sm mt-2"><i class="bi bi-journal-text me-1"></i> گزارش ریز</a>
+      </div></div>
+  </div>
+  <div class="col-lg-8"><div class="card h-100"><div class="card-header"><i class="bi bi-calendar2-check"></i> مرخصی‌های اخیر</div>
+    <div class="card-body p-0"><table class="table align-middle">
+      <thead><tr><th>نوع</th><th>بازه</th><th>روز</th><th>وضعیت</th></tr></thead>
+      <tbody>
+        <% if (!leaves.length) { %><tr><td colspan="4" class="text-center text-muted2 py-3">مرخصی‌ای ثبت نشده.</td></tr><% } %>
+        <% leaves.forEach(function(l){ %>
+          <tr><td><span class="badge" style="background:<%= l.color %>"><%= l.type_name %></span></td>
+          <td style="font-size:12px"><%= U.jDate(l.from_date) %> تا <%= U.jDate(l.to_date) %></td>
+          <td><%= U.faNum(l.days) %></td>
+          <td><span class="badge bg-<%= HH.badgeClass(l.status) %>"><%= U.label(l.status) %></span></td></tr>
+        <% }) %>
+      </tbody></table></div></div></div>
+</div>
+<% } %>
+
+<% if (tab === 'payroll') { %>
+<div class="card"><div class="card-header"><i class="bi bi-cash-stack"></i> سوابق حقوق</div>
+  <div class="card-body p-0"><table class="table align-middle">
+    <thead><tr><th>ماه</th><th>پایه</th><th>اضافه‌کاری</th><th>مزایا</th><th>کسورات</th><th>بیمه</th><th>مالیات</th><th>خالص</th><th>فیش</th></tr></thead>
+    <tbody>
+      <% if (!payslips.length) { %><tr><td colspan="9" class="text-center text-muted2 py-3">لیست حقوقی صادر نشده.</td></tr><% } %>
+      <% payslips.forEach(function(p){ %>
+        <tr><td><%= p.month.replace('-', '/') %> <span class="badge bg-<%= HH.badgeClass(p.status) %>"><%= U.label(p.status) %></span></td>
+        <td><%= U.money(p.base, currency) %></td><td><%= U.money(p.overtime_amount, currency) %></td>
+        <td><%= U.money(p.allowances, currency) %></td><td><%= U.money(p.deductions, currency) %></td>
+        <td><%= U.money(p.insurance, currency) %></td><td><%= U.money(p.tax, currency) %></td>
+        <td><b><%= U.money(p.net, currency) %></b></td>
+        <td><a href="/payroll/slip/<%= p.id %>" class="btn btn-sm btn-outline-primary btn-icon"><i class="bi bi-printer"></i></a></td></tr>
+      <% }) %>
+    </tbody></table></div></div>
+<% } %>
+
+<% if (tab === 'assets') { %>
+<div class="card"><div class="card-header"><i class="bi bi-box-seam"></i> اموال تحت سرپرستی</div>
+  <div class="card-body p-0"><table class="table align-middle">
+    <thead><tr><th>دارایی</th><th>کد</th><th>تاریخ تحویل</th><th>وضعیت</th></tr></thead>
+    <tbody>
+      <% if (!myAssets.length) { %><tr><td colspan="4" class="text-center text-muted2 py-3">دارایی‌ای تحویل نشده است.</td></tr><% } %>
+      <% myAssets.forEach(function(a){ %>
+        <tr><td><%= a.asset_name %></td><td dir="ltr"><%= a.asset_code %></td><td><%= U.jDate(a.assigned_date) %></td>
+        <td><span class="badge bg-warning text-dark">تحویل‌شده</span></td></tr>
+      <% }) %>
+    </tbody></table></div></div>
+<% } %>
+
+<% if (tab === 'perf') { %>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-bullseye"></i> اهداف</div>
+    <div class="card-body p-0"><table class="table align-middle">
+      <thead><tr><th>هدف</th><th>وزن</th><th style="width:35%">پیشرفت</th></tr></thead>
+      <tbody>
+        <% if (!goals.length) { %><tr><td colspan="3" class="text-center text-muted2 py-3">هدفی ثبت نشده.</td></tr><% } %>
+        <% goals.forEach(function(g){ %>
+          <tr><td><%= g.title %><br><small class="text-muted2">مهلت: <%= U.jDate(g.due_date) %></small></td><td><%= U.faNum(g.weight) %>٪</td>
+          <td><div class="progress" style="height:8px"><div class="progress-bar" style="width:<%= g.progress %>%"></div></div><small><%= U.faNum(g.progress) %>٪</small></td></tr>
+        <% }) %>
+      </tbody></table></div></div></div>
+  <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-mortarboard"></i> آموزش‌ها</div>
+    <div class="card-body p-0"><table class="table align-middle">
+      <thead><tr><th>دوره</th><th>وضعیت</th><th>نمره</th><th>گواهی</th></tr></thead>
+      <tbody>
+        <% if (!trainings.length) { %><tr><td colspan="4" class="text-center text-muted2 py-3">ثبت‌نامی وجود ندارد.</td></tr><% } %>
+        <% trainings.forEach(function(t){ %>
+          <tr><td><%= t.training_title %></td><td><span class="badge bg-<%= HH.badgeClass(t.status) %>"><%= U.label(t.status) %></span></td>
+          <td><%= t.score ? U.faNum(t.score) : '—' %></td>
+          <td><% if (t.certificate_path) { %><a href="/files/cert/<%= t.id %>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-download"></i></a><% } else { %>—<% } %></td></tr>
+        <% }) %>
+      </tbody></table></div></div></div>
+</div>
+<% } %>
+
+<% if (tab === 'checklist') { %>
+<div class="row g-3">
+  <% ['onboarding', 'offboarding'].forEach(function(phase){ const items = checklist.filter(c => c.phase === phase); const doneCount = items.filter(i=>i.done).length; %>
+    <div class="col-lg-6"><div class="card h-100">
+      <div class="card-header"><i class="bi bi-list-check"></i> چک‌لیست <%= phase === 'onboarding' ? 'ورود (Onboarding)' : 'خروج (Offboarding)' %>
+        <span class="badge bg-<%= items.length && doneCount===items.length ? 'success':'secondary' %> ms-auto"><%= U.faNum(doneCount) %> / <%= U.faNum(items.length) %></span></div>
+      <div class="card-body p-0">
+        <% if (items.length) { %>
+          <div class="progress mx-3 mt-3" style="height:7px"><div class="progress-bar bg-success" style="width:<%= items.length ? doneCount/items.length*100 : 0 %>%"></div></div>
+          <ul class="list-group list-group-flush mt-2">
+            <% items.forEach(function(it){ %>
+              <li class="list-group-item d-flex align-items-center gap-2 bg-transparent">
+                <form method="post" action="/employees/<%= e.id %>/checklist/<%= it.id %>/toggle">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <button class="btn btn-sm btn-icon <%= it.done ? 'btn-success' : 'btn-outline-secondary' %>"><i class="bi <%= it.done ? 'bi-check-lg' : 'bi-circle' %>"></i></button>
+                </form>
+                <span style="<%= it.done ? 'text-decoration:line-through;opacity:.6' : '' %>"><%= it.title %>
+                  <% if (it.assignee) { %><small class="text-muted2">— <%= it.assignee %></small><% } %></span>
+                <form class="ms-auto" method="post" action="/employees/<%= e.id %>/checklist/<%= it.id %>/delete" data-confirm="حذف شود؟">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <button class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-x"></i></button>
+                </form>
+              </li>
+            <% }) %>
+          </ul>
+        <% } else { %><div class="empty-state" style="padding:18px">موردی ندارد.</div><% } %>
+        <div class="p-3 border-top">
+          <form method="post" action="/employees/<%= e.id %>/checklist" class="row g-2">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <input type="hidden" name="phase" value="<%= phase %>">
+            <div class="col-7"><input class="form-control form-control-sm" name="title" placeholder="مورد جدید چک‌لیست" required></div>
+            <div class="col-3"><input class="form-control form-control-sm" name="assignee" placeholder="مسئول"></div>
+            <div class="col-2"><button class="btn btn-sm btn-primary w-100">+</button></div>
+          </form>
+        </div>
+      </div></div></div>
+  <% }) %>
+</div>
+<% } %>
+<%- include('../partials/layout_bottom') %>

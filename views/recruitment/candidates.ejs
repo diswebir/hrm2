@@ -1,0 +1,76 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-person-plus"></i> کاندیداها</h1>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm <%= view==='list'?'active':'' %>" href="/candidates?view=list&posting=<%= posting %>"><i class="bi bi-list-ul me-1"></i> لیست</a>
+    <a class="btn btn-outline-secondary btn-sm <%= view==='kanban'?'active':'' %>" href="/candidates?view=kanban&posting=<%= posting %>"><i class="bi bi-kanban me-1"></i> کانبان</a>
+    <a class="btn btn-primary btn-sm" href="/candidates/new"><i class="bi bi-plus-lg me-1"></i> کاندیدای جدید</a>
+  </div>
+</div>
+<div class="mb-3">
+  <form class="row g-2" method="get" action="/candidates">
+    <input type="hidden" name="view" value="<%= view %>">
+    <div class="col-md-4"><select class="form-select form-select-sm" name="posting" onchange="this.form.submit()">
+      <option value="">همه آگهی‌ها</option>
+      <% postings.forEach(function(p){ %><option value="<%= p.id %>" <%= posting==String(p.id)?'selected':'' %>><%= p.title %></option><% }) %></select></div>
+  </form>
+</div>
+
+<% if (view === 'kanban') { %>
+  <div class="kanban">
+    <% stages.forEach(function(st){ const list = rows.filter(r => r.stage === st); %>
+      <div class="kan-col">
+        <h6><%= U.label(st) %> <span class="badge bg-secondary"><%= U.faNum(list.length) %></span></h6>
+        <% list.forEach(function(c){ %>
+          <div class="kan-card">
+            <a href="/candidates/<%= c.id %>" class="fw-bold" style="text-decoration:none"><%= c.name %></a>
+            <div class="text-muted2" style="font-size:11.5px"><%= c.posting_title %></div>
+            <% if (c.rating) { %><div style="font-size:11px">
+              <% for (let i = 1; i <= 5; i++) { %><i class="bi bi-star<%= i<=c.rating?'-fill':'' %> text-warning"></i><% } %>
+            </div><% } %>
+            <form class="d-flex gap-1 mt-2" method="post" action="/candidates/<%= c.id %>/stage">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <input type="hidden" name="back" value="/candidates?view=kanban&posting=<%= posting %>">
+              <select class="form-select form-select-sm" name="stage" style="font-size:11px" onchange="this.form.submit()">
+                <% stages.forEach(function(s2){ %><option value="<%= s2 %>" <%= st===s2?'selected':'' %>><%= U.label(s2) %></option><% }) %>
+              </select>
+            </form>
+          </div>
+        <% }) %>
+        <% if (!list.length) { %><div class="text-center text-muted2 py-3" style="font-size:12px">— خالی —</div><% } %>
+      </div>
+    <% }) %>
+  </div>
+<% } else { %>
+  <div class="card">
+    <div class="card-body p-0">
+      <% if (!rows.length) { %><div class="empty-state"><i class="bi bi-person-plus"></i>کاندیدایی ثبت نشده است.</div>
+      <% } else { %><div class="table-wrap p-3"><table class="table table-hover align-middle" data-sortable>
+        <thead><tr><th>نام</th><th>آگهی</th><th>تماس</th><th>منبع</th><th>امتیاز</th><th>مرحله</th><th></th></tr></thead>
+        <tbody>
+          <% rows.forEach(function(c){ %>
+            <tr>
+              <td><a href="/candidates/<%= c.id %>" class="fw-bold" style="text-decoration:none"><%= c.name %></a></td>
+              <td><%= c.posting_title %></td>
+              <td style="font-size:12px" dir="ltr"><%= c.phone || c.email || '—' %></td>
+              <td><%= c.source %></td>
+              <td><% for (let i = 1; i <= 5; i++) { %><i class="bi bi-star<%= i<=c.rating?'-fill':'' %> text-warning"></i><% } %></td>
+              <td><span class="badge bg-<%= c.stage==='hired'?'success':(c.stage==='rejected'?'danger':'primary') %>"><%= U.label(c.stage) %></span></td>
+              <td class="text-nowrap">
+                <a class="btn btn-sm btn-outline-primary btn-icon" href="/candidates/<%= c.id %>"><i class="bi bi-eye"></i></a>
+                <a class="btn btn-sm btn-outline-secondary btn-icon" href="/candidates/<%= c.id %>/edit"><i class="bi bi-pencil"></i></a>
+                <form class="d-inline" method="post" action="/candidates/<%= c.id %>/delete" data-confirm="کاندیدا حذف شود؟">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <button class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-trash"></i></button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table></div><% } %>
+    </div>
+  </div>
+<% } %>
+<%- include('../partials/layout_bottom') %>

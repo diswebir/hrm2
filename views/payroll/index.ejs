@@ -1,0 +1,61 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-cash-stack"></i> لیست حقوق</h1>
+    <div class="subtitle">محاسبه خودکار بر اساس حضور، اضافه‌کاری تاییدشده، بیمه و مالیات</div>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-magic"></i> صدور لیست ماه جدید</div>
+      <div class="card-body">
+        <form method="post" action="/payroll/generate">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <div class="mb-3">
+            <label class="form-label">ماه شمسی</label>
+            <div class="d-flex gap-2">
+              <select class="form-select" name="month_jm" id="genJm">
+                <% U.FA_MONTHS.forEach(function(m, i){ %><option value="<%= i+1 %>" <%= i+1===parseInt(currentMonth.split('-')[1],10)?'selected':'' %>><%= m %></option><% }) %>
+              </select>
+              <input type="number" class="form-control" name="month_jy" id="genJy" value="<%= currentMonth.split('-')[0] %>" style="max-width:110px">
+            </div>
+          </div>
+          <button class="btn btn-primary w-100" style="font-weight:700"><i class="bi bi-calculator me-1"></i> محاسبه لیست ماه</button>
+          <div class="form-text mt-2">لیست پیش‌نویس قبلی همان ماه حذف و از نو محاسبه می‌شود. لیست‌های نهایی دست‌نخورده می‌مانند.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-list-ol"></i> لیست‌های صادرشده</div>
+      <div class="card-body p-0">
+        <% if (!months.length) { %><div class="empty-state"><i class="bi bi-wallet2"></i>هنوز لیستی صادر نشده است. از فرم کنار شروع کنید.</div>
+        <% } else { %><div class="table-wrap p-3"><table class="table table-hover align-middle" data-sortable>
+          <thead><tr><th>ماه</th><th>تعداد</th><th>جمع خالص</th><th>وضعیت</th><th></th></tr></thead>
+          <tbody>
+            <% months.forEach(function(m){ const j = m.month.split('-'); %>
+              <tr>
+                <td><b><%= U.FA_MONTHS[parseInt(j[1],10)-1] %> <%= U.faNum(j[0]) %></b></td>
+                <td><%= U.faNum(m.c) %> نفر</td>
+                <td><%= U.money(m.net, s.currency) %></td>
+                <td><%= m.finals >= m.c ? '<span class="badge bg-success">نهایی</span>' : '<span class="badge bg-warning text-dark">پیش‌نویس</span>' %></td>
+                <td><a class="btn btn-sm btn-outline-primary" href="/payroll/<%= m.month %>"><i class="bi bi-eye me-1"></i> مشاهده</a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table></div><% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  document.querySelector('form[action="/payroll/generate"]').addEventListener('submit', function () {
+    const jy = document.getElementById('genJy').value, jm = document.getElementById('genJm').value;
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden'; hidden.name = 'month'; hidden.value = jy + '-' + String(jm).padStart(2, '0');
+    this.appendChild(hidden);
+  });
+</script>
+<%- include('../partials/layout_bottom') %>

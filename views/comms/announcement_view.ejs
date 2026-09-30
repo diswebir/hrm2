@@ -1,0 +1,17 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
+          <h1 style="font-size:21px;font-weight:900" class="mb-0"><%= a.pinned ? '📌 ' : '' %><%= a.title %></h1>
+          <small class="text-muted2"><%= a.dept_name ? 'ویژه ' + a.dept_name : 'عمومی' %> — <%= U.jDate((a.publish_date || '').slice(0,10)) %></small>
+        </div>
+        <hr>
+        <div style="white-space:pre-wrap;line-height:2.1;font-size:14px"><%= a.body %></div>
+      </div>
+    </div>
+    <a href="/announcements/all" class="btn btn-outline-secondary btn-sm mt-3">بازگشت به اطلاعیه‌ها</a>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

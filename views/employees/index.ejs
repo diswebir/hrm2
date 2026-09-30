@@ -1,0 +1,68 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-people"></i> کارکنان</h1>
+    <div class="subtitle"><%= U.faNum(total) %> کارمند</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="/employees/export"><i class="bi bi-download me-1"></i> خروجی CSV</a>
+    <a class="btn btn-primary btn-sm" href="/employees/new"><i class="bi bi-person-plus me-1"></i> ثبت کارمند</a>
+  </div>
+</div>
+<%- include('../partials/flash') %>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="p-3 pb-0">
+      <form class="row g-2" method="get" action="/employees">
+        <div class="col-md-4"><input type="text" class="form-control form-control-sm" name="q" placeholder="جستجو: نام، کد، کد ملی، تلفن..." value="<%= q %>"></div>
+        <div class="col-md-3">
+          <select class="form-select form-select-sm" name="dept" onchange="this.form.submit()">
+            <option value="">همه دپارتمان‌ها</option>
+            <% depts.forEach(function(d){ %><option value="<%= d.id %>" <%= dept==String(d.id)?'selected':'' %>><%= d.name %></option><% }) %>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select form-select-sm" name="status" onchange="this.form.submit()">
+            <option value="">همه وضعیت‌ها</option>
+            <option value="active" <%= status==='active'?'selected':'' %>>شاغل</option>
+            <option value="suspended" <%= status==='suspended'?'selected':'' %>>تعلیق</option>
+            <option value="terminated" <%= status==='terminated'?'selected':'' %>>خاتمه همکاری</option>
+          </select>
+        </div>
+        <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">فیلتر</button></div>
+      </form>
+    </div>
+    <% if (!rows.length) { %><div class="empty-state"><i class="bi bi-people"></i>کارمندی یافت نشد.</div>
+    <% } else { %>
+      <div class="table-wrap p-3">
+        <table class="table table-hover align-middle" data-sortable>
+          <thead><tr><th></th><th>کد</th><th>نام و نام خانوادگی</th><th>سمت</th><th>دپارتمان</th><th>تلفن</th><th>استخدام</th><th>حقوق پایه</th><th>وضعیت</th><th></th></tr></thead>
+          <tbody>
+            <% rows.forEach(function(e){ %>
+              <tr>
+                <td>
+                  <% if (e.photo) { %><img class="avatar-sm" src="/uploads/<%= e.photo %>" alt="">
+                  <% } else { %><span class="avatar-sm"><%= e.first_name.charAt(0) %></span><% } %>
+                </td>
+                <td><%= U.faNum(e.code) %></td>
+                <td><a href="/employees/<%= e.id %>" class="fw-bold" style="text-decoration:none"><%= e.first_name %> <%= e.last_name %></a></td>
+                <td><%= e.desig_name || '—' %></td>
+                <td><%= e.dept_name || '—' %></td>
+                <td dir="ltr" style="text-align:right"><%= e.phone ? U.faNum(e.phone) : '—' %></td>
+                <td><%= U.jDate(e.hire_date) %></td>
+                <td><%= U.money(e.base_salary, currency) %></td>
+                <td><span class="badge bg-<%= HH.badgeClass(e.status) %>"><%= U.label(e.status) %></span></td>
+                <td class="text-nowrap">
+                  <a class="btn btn-sm btn-outline-primary btn-icon" href="/employees/<%= e.id %>" title="پرونده"><i class="bi bi-folder2-open"></i></a>
+                  <a class="btn btn-sm btn-outline-secondary btn-icon" href="/employees/<%= e.id %>/edit" title="ویرایش"><i class="bi bi-pencil"></i></a>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class="px-3"><%- include('../partials/pagination', {q:{q,dept,status}, total}) %></div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

@@ -1,0 +1,166 @@
+/* سامانه HRM — استایل اصلی (فارسی/RTL) */
+:root{
+  --sb-w:260px;
+  --brand:#4f46e5; --brand-2:#6d28d9;
+  --bg:#f4f5fb; --card:#ffffff; --border:#e6e8f0;
+  --text:#1e2438; --muted:#6b7280;
+  --sb-bg:#171c33; --sb-text:#c7cbe3; --sb-active:#4f46e5;
+  --radius:14px;
+}
+[data-theme="dark"]{
+  --bg:#0f1424; --card:#181f35; --border:#2a3350;
+  --text:#e5e8f4; --muted:#9aa3c0;
+  --sb-bg:#0b0f1e; --sb-text:#aab2d0;
+}
+*{font-family:'Vazirmatn',Tahoma,sans-serif;}
+body{background:var(--bg);color:var(--text);font-size:14px;}
+a{color:var(--brand);}
+a:hover{color:var(--brand-2);}
+
+/* ---------- چیدمان ---------- */
+.app{display:flex;min-height:100vh;}
+.sidebar{width:var(--sb-w);min-height:100vh;background:var(--sb-bg);color:var(--sb-text);
+  position:fixed;top:0;right:0;bottom:0;overflow-y:auto;z-index:1040;padding-bottom:30px;transition:transform .25s;}
+.sidebar::-webkit-scrollbar{width:5px}.sidebar::-webkit-scrollbar-thumb{background:#39415f;border-radius:5px}
+.sb-brand{display:flex;align-items:center;gap:10px;padding:18px 20px;color:#fff;text-decoration:none;}
+.sb-brand .logo{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--brand),var(--brand-2));
+  display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0;}
+.sb-brand b{font-size:15px;line-height:1.5;}
+.sb-brand small{display:block;font-size:11px;color:#8b93b8;font-weight:400}
+.sb-section{padding:14px 20px 4px;font-size:11px;color:#767ea6;letter-spacing:.5px;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 20px;color:var(--sb-text);text-decoration:none;font-size:13.5px;border-right:3px solid transparent;}
+.sb-item:hover{background:rgba(255,255,255,.05);color:#fff;}
+.sb-item.active{background:rgba(99,102,241,.15);border-right-color:var(--sb-active);color:#fff;}
+.sb-item i{font-size:16px;width:22px;text-align:center;}
+.main{flex:1;margin-right:var(--sb-w);min-width:0;display:flex;flex-direction:column;}
+.content{padding:22px 26px;flex:1;}
+@media(max-width:991px){
+  .sidebar{transform:translateX(100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main{margin-right:0;}
+  .content{padding:14px;}
+  .sb-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1035;}
+}
+
+/* ---------- نوار بالا ---------- */
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:10px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:1030;}
+.topbar .search-box{max-width:380px;flex:1;position:relative;}
+.topbar .search-box input{border-radius:99px;padding:7px 38px 7px 14px;background:var(--bg);border:1px solid var(--border);width:100%;}
+.topbar .search-box i{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);}
+.topbar .icon-btn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:transparent;color:var(--text);display:flex;align-items:center;justify-content:center;position:relative;text-decoration:none;}
+.topbar .icon-btn:hover{background:var(--bg);}
+.notif-dot{position:absolute;top:6px;left:6px;width:8px;height:8px;border-radius:50%;background:#ef4444;}
+.user-chip{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--text);}
+.user-chip img,.user-chip .av{width:36px;height:36px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.avatar-sm{width:32px;height:32px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;}
+.avatar-lg{width:96px;height:96px;border-radius:50%;object-fit:cover;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:34px;}
+
+/* ---------- کارت‌ها ---------- */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:0 1px 3px rgba(16,24,40,.05);}
+.card .card-header{background:transparent;border-bottom:1px solid var(--border);font-weight:600;padding:14px 18px;display:flex;align-items:center;gap:8px;}
+.card .card-header i{color:var(--brand);}
+.kpi{border-radius:var(--radius);padding:18px;background:var(--card);border:1px solid var(--border);height:100%;}
+.kpi .k-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;margin-bottom:12px;}
+.kpi .k-val{font-size:24px;font-weight:800;}
+.kpi .k-label{color:var(--muted);font-size:12.5px;}
+.page-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap;}
+.page-title h1{font-size:20px;font-weight:800;margin:0;display:flex;align-items:center;gap:10px;}
+.page-title h1 i{color:var(--brand);background:rgba(79,70,229,.1);width:42px;height:42px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;}
+.subtitle{color:var(--muted);font-size:13px;margin-top:4px;}
+
+/* ---------- جدول ---------- */
+.table{color:var(--text);--bs-table-color:var(--text);--bs-table-bg:transparent;--bs-table-border-color:var(--border);margin-bottom:0;font-size:13.5px;}
+.table thead th{background:var(--bg);color:var(--muted);font-weight:600;font-size:12px;border-bottom:1px solid var(--border);white-space:nowrap;}
+.table tbody tr:hover{background:rgba(79,70,229,.045);}
+.table-wrap{overflow-x:auto;border-radius:12px;}
+.badge{font-weight:600;padding:.42em .7em;border-radius:7px;font-size:11px;}
+
+/* ---------- فرم‌ها ---------- */
+.form-label{font-weight:600;font-size:12.5px;margin-bottom:4px;}
+.form-control,.form-select{border-color:var(--border);background:var(--card);color:var(--text);border-radius:10px;padding:8px 12px;font-size:13.5px;}
+.form-control:focus,.form-select:focus{border-color:var(--brand);box-shadow:0 0 0 .2rem rgba(79,70,229,.12);background:var(--card);color:var(--text);}
+.form-control[readonly]{background:var(--bg);}
+.form-text{font-size:11.5px;color:var(--muted);}
+.req::after{content:" *";color:#ef4444;}
+.btn{border-radius:10px;font-size:13.5px;padding:8px 16px;}
+.btn-primary{background:var(--brand);border-color:var(--brand);}
+.btn-primary:hover{background:var(--brand-2);border-color:var(--brand-2);}
+.btn-sm{padding:4px 10px;font-size:12px;border-radius:8px;}
+.btn-icon{width:32px;height:32px;padding:0;display:inline-flex;align-items:center;justify-content:center;}
+
+/* ---------- تقویم شمسی ---------- */
+.jdp{position:absolute;z-index:1080;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 12px 34px rgba(16,24,40,.18);padding:10px;width:264px;display:none;direction:rtl;}
+.jdp.show{display:block;}
+.jdp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.jdp-head button{border:none;background:var(--bg);border-radius:8px;width:30px;height:30px;color:var(--text);}
+.jdp-title{font-weight:700;font-size:13.5px;cursor:pointer;text-align:center;}
+.jdp-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;}
+.jdp-grid .dow{font-size:10.5px;color:var(--muted);padding:4px 0;}
+.jdp-day{border:none;background:transparent;border-radius:8px;height:32px;font-size:12.5px;color:var(--text);}
+.jdp-day:hover{background:rgba(79,70,229,.12);}
+.jdp-day.today{outline:1.5px solid var(--brand);}
+.jdp-day.selected{background:var(--brand);color:#fff;}
+.jdp-day.empty{visibility:hidden;}
+.jdp-months{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.jdp-months button{border:none;background:transparent;border-radius:8px;padding:9px 0;font-size:12.5px;color:var(--text);}
+.jdp-months button:hover{background:rgba(79,70,229,.12);}
+.jdp-years{max-height:180px;overflow-y:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+.jdp-years button{border:none;background:transparent;border-radius:8px;padding:7px 0;font-size:12.5px;color:var(--text);}
+.jdp-years button:hover{background:rgba(79,70,229,.12);}
+.jdp-foot{display:flex;justify-content:space-between;margin-top:6px;}
+.jdp-foot button{border:none;background:transparent;color:var(--brand);font-size:12px;}
+
+/* ---------- تقویم ماهانه ---------- */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.cal-dow{text-align:center;font-size:12px;color:var(--muted);font-weight:700;padding:6px 0;}
+.cal-cell{min-height:96px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:6px;font-size:11.5px;}
+.cal-cell.empty{background:transparent;border-style:dashed;opacity:.4;}
+.cal-cell.weekend{background:rgba(239,68,68,.06);}
+.cal-cell.holiday{background:rgba(239,68,68,.1);}
+.cal-day-num{font-weight:800;font-size:13px;}
+.cal-leave{border-radius:6px;padding:2px 6px;margin-top:3px;color:#fff;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cal-ev{background:rgba(79,70,229,.1);color:var(--brand);border-radius:6px;padding:2px 6px;margin-top:3px;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.att-p{color:#16a34a;font-weight:700}.att-a{color:#dc2626;font-weight:700}.att-l{color:#2563eb;font-weight:700}.att-m{color:#7c3aed;font-weight:700}.att-h{color:#6b7280;font-weight:700}
+
+/* ---------- درباره ---------- */
+.feat-cat{margin-bottom:26px;}
+.feat-cat-title{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:800;margin-bottom:12px;}
+.feat-cat-title i{color:var(--brand);}
+.feat{display:flex;gap:14px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;}
+.feat .no{flex-shrink:0;width:38px;height:38px;border-radius:11px;background:linear-gradient(135deg,var(--brand),var(--brand-2));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;}
+.feat h6{font-weight:700;margin-bottom:5px;}
+.feat .desc{color:var(--muted);font-size:13px;margin-bottom:8px;}
+.feat .how{background:var(--bg);border-radius:9px;padding:9px 12px;font-size:12.5px;line-height:1.9;}
+.feat .path{margin-top:7px;font-size:11.5px;color:var(--brand);display:inline-flex;align-items:center;gap:5px;}
+.feat .path i{font-size:12px;}
+
+/* ---------- کانبان ---------- */
+.kanban{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;}
+.kan-col{min-width:210px;flex:1;background:var(--bg);border-radius:12px;padding:10px;}
+.kan-col h6{font-size:12.5px;font-weight:700;color:var(--muted);padding:4px 6px;}
+.kan-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px;margin-bottom:8px;font-size:12.5px;}
+
+/* ---------- سایر ---------- */
+.progress{background:var(--bg);border-radius:99px;}
+.chart-box{position:relative;height:280px;}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#171c33,#2b2464);padding:16px;}
+.login-card{width:100%;max-width:400px;background:var(--card);border-radius:20px;padding:34px 30px;box-shadow:0 25px 60px rgba(0,0,0,.35);}
+.install-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px dashed var(--border);}
+.check-ok{color:#16a34a}.check-bad{color:#dc2626}
+.timeline{border-right:2px solid var(--border);padding-right:16px;}
+.timeline .tl-item{position:relative;padding-bottom:16px;}
+.timeline .tl-item::before{content:'';position:absolute;right:-22px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--brand);}
+.alert{border-radius:12px;font-size:13.5px;}
+.dropdown-menu{border-radius:12px;border:1px solid var(--border);box-shadow:0 10px 30px rgba(16,24,40,.15);font-size:13.5px;}
+.dropdown-item:active{background:var(--brand);}
+.empty-state{text-align:center;padding:40px 16px;color:var(--muted);}
+.empty-state i{font-size:44px;opacity:.4;display:block;margin-bottom:10px;}
+footer.app-footer{padding:14px 26px;color:var(--muted);font-size:12px;border-top:1px solid var(--border);}
+.text-muted2{color:var(--muted)!important;}
+@media print{
+  .sidebar,.topbar,.no-print,footer.app-footer,.btn{display:none!important;}
+  .main{margin:0!important;}
+  body{background:#fff;}
+  .card{border:none;box-shadow:none;}
+  .content{padding:0;}
+}

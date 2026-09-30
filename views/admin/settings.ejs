@@ -1,0 +1,94 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-gear"></i> تنظیمات سامانه</h1>
+  </div>
+</div>
+<% if (saved) { %><div class="alert alert-success">تنظیمات ذخیره شد.</div><% } %>
+<% if (q.error) { %><div class="alert alert-danger"><%= q.error %></div><% } %>
+<form method="post" action="/settings">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="row g-3">
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-building"></i> عمومی</div>
+        <div class="card-body">
+          <div class="mb-3"><label class="form-label">نام شرکت</label><input class="form-control" name="company_name" value="<%= s.company_name %>"></div>
+          <div class="mb-3"><label class="form-label">نام نمایشی سامانه</label><input class="form-control" name="system_name" value="<%= s.system_name %>"></div>
+          <div class="mb-3"><label class="form-label">واحد پول</label><input class="form-control" name="currency" value="<%= s.currency %>"></div>
+          <div class="mb-0"><label class="form-label">اختلاف دقیقه‌ای با UTC (ایران = ۲۱۰)</label>
+            <input type="number" class="form-control" name="tz_offset" value="<%= s.tz_offset %>"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-cash-stack"></i> حقوق و دستمزد</div>
+        <div class="card-body">
+          <div class="mb-3"><label class="form-label">نرخ ساعتی اضافه‌کاری <small class="text-muted2">(خالی = خودکار: حقوق پایه ÷ ۲۲۰)</small></label>
+            <input class="form-control" name="ot_hourly_rate" value="<%= s.ot_hourly_rate %>"></div>
+          <div class="mb-3"><label class="form-label">درصد بیمه سهم کارمند</label>
+            <input type="number" step="0.5" class="form-control" name="insurance_percent" value="<%= s.insurance_percent %>"></div>
+          <div class="mb-0"><label class="form-label">درصد مالیات</label>
+            <input type="number" step="0.5" class="form-control" name="tax_percent" value="<%= s.tax_percent %>"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-shield-check"></i> امنیت</div>
+        <div class="card-body">
+          <div class="mb-3"><label class="form-label">حداقل طول رمز عبور</label>
+            <input type="number" min="6" max="32" class="form-control" name="min_password_length" value="<%= s.min_password_length %>"></div>
+          <div class="mb-3"><label class="form-label">حداکثر تلاش ورود ناموفق</label>
+            <input type="number" min="3" max="10" class="form-control" name="login_max_attempts" value="<%= s.login_max_attempts %>"></div>
+          <div class="mb-0"><label class="form-label">مدت قفل حساب (دقیقه)</label>
+            <input type="number" min="1" max="1440" class="form-control" name="lock_minutes" value="<%= s.lock_minutes %>"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-header"><i class="bi bi-envelope"></i> ایمیل SMTP (اختیاری)</div>
+        <div class="card-body">
+          <div class="form-check form-switch mb-3">
+            <input class="form-check-input" type="checkbox" name="smtp_enabled" value="1" id="smtpEn" <%= s.smtp_enabled==='1'?'checked':'' %>>
+            <label class="form-check-label form-label" for="smtpEn">فعال‌سازی ارسال ایمیل (بازیابی رمز و...)</label>
+          </div>
+          <div class="row g-2">
+            <div class="col-md-8"><label class="form-label">سرور SMTP</label><input class="form-control" name="smtp_host" value="<%= s.smtp_host || '' %>" dir="ltr" placeholder="mail.example.com"></div>
+            <div class="col-md-4"><label class="form-label">پورت</label><input type="number" class="form-control" name="smtp_port" value="<%= s.smtp_port || 587 %>" dir="ltr"></div>
+            <div class="col-md-6"><label class="form-label">نام کاربری</label><input class="form-control" name="smtp_user" value="<%= s.smtp_user || '' %>" dir="ltr"></div>
+            <div class="col-md-6"><label class="form-label">رمز</label><input type="password" class="form-control" name="smtp_pass" value="<%= s.smtp_pass || '' %>" dir="ltr"></div>
+            <div class="col-md-8"><label class="form-label">فرستنده</label><input class="form-control" name="smtp_from" value="<%= s.smtp_from || '' %>" dir="ltr" placeholder="hr@example.com"></div>
+            <div class="col-md-4"><div class="form-check mt-4"><input class="form-check-input" type="checkbox" name="smtp_secure" value="1" id="smtpSec" <%= s.smtp_secure==='1'?'checked':'' %>><label class="form-check-label" for="smtpSec" style="font-size:12.5px">SSL</label></div></div>
+          </div>
+          <div class="form-text mt-2">وضعیت فعلی: <%= hasSmtp ? '✅ فعال' : 'غیرفعال — لینک بازیابی رمز به مدیر سامانه اعلان می‌شود' %></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12">
+      <button class="btn btn-primary px-5" style="font-weight:700"><i class="bi bi-check-lg me-1"></i> ذخیره تنظیمات</button>
+    </div>
+  </div>
+</form>
+
+<hr class="my-4">
+<div class="card border-danger">
+  <div class="card-header text-danger"><i class="bi bi-exclamation-octagon"></i> ناحیه خطر — بازنشانی کامل سامانه</div>
+  <div class="card-body">
+    <p style="font-size:13px" class="text-muted2">
+      همه داده‌ها (کارکنان، حضور، حقوق و...) حذف و سامانه از نو نصب می‌شود. قبل از این کار حتماً از بخش پشتیبان‌گیری، نسخه پشتیبان دانلود کنید.
+      برای تایید، عبارت <code dir="ltr">RESET</code> را وارد کنید.
+    </p>
+    <form method="post" action="/settings/reset" class="row g-2" data-confirm="مطمئن هستید؟ همه داده‌ها از بین می‌رود!">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <div class="col-md-2"><input class="form-control" name="confirm" placeholder="RESET" dir="ltr" required></div>
+      <div class="col-md-3"><input class="form-control" name="company_name" placeholder="نام شرکت جدید" value="<%= s.company_name %>"></div>
+      <div class="col-md-3"><input class="form-control" name="username" placeholder="نام کاربری مدیر جدید" dir="ltr" value="admin"></div>
+      <div class="col-md-3"><input class="form-control" name="new_admin_pass" placeholder="رمز مدیر جدید (حداقل ۶)" dir="ltr" required></div>
+      <div class="col-md-1"><button class="btn btn-danger w-100"><i class="bi bi-arrow-repeat"></i></button></div>
+    </form>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

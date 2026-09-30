@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>بازیابی رمز | سامانه منابع انسانی</title>
+  <link rel="stylesheet" href="/vendor/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="/vendor/fonts-vazirmatn/vazirmatn.css">
+  <style>body{font-family:'Vazirmatn',Tahoma;font-size:14px}</style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-card">
+    <h1 class="text-center mb-3" style="font-size:18px;font-weight:800"><i class="bi bi-key"></i> بازیابی رمز عبور</h1>
+    <% if (error) { %><div class="alert alert-danger py-2"><%= error %></div><% } %>
+    <% if (done) { %>
+      <div class="alert alert-success" style="font-size:13px;line-height:2">
+        <i class="bi bi-check-circle me-1"></i> <%= note || 'درخواست شما ثبت شد. اگر حساب با این مشخصات وجود داشته باشد، لینک بازیابی ارسال یا برای مدیر سامانه اعلان می‌شود.' %>
+      </div>
+      <a href="/login" class="btn btn-primary w-100">بازگشت به صفحه ورود</a>
+    <% } else { %>
+      <p class="text-muted" style="font-size:13px">نام کاربری یا ایمیل حساب خود را وارد کنید:</p>
+      <form method="post" action="/forgot">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="text" class="form-control mb-3" name="username" required autofocus>
+        <button class="btn btn-primary w-100">ارسال لینک بازیابی</button>
+      </form>
+      <a href="/login" class="d-block text-center mt-3" style="font-size:12.5px">بازگشت به ورود</a>
+    <% } %>
+  </div>
+</div>
+</body>
+</html>

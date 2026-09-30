@@ -1,0 +1,36 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-calculator"></i> مانده مرخصی‌ها — سال <%= U.faNum(jy) %></h1>
+    <div class="subtitle">مصرف فقط شامل درخواست‌های تاییدشده از ابتدای فروردین است</div>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="/leave/balances?jy=<%= jy %>&csv=1"><i class="bi bi-download me-1"></i> خروجی CSV</a>
+</div>
+<div class="card">
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle" data-sortable>
+      <thead><tr><th>کد</th><th>کارمند</th>
+        <% types.forEach(function(t){ %><th><%= t.name %> <small class="text-muted2">(از <%= U.faNum(t.annual_quota) %>)</small></th><% }) %>
+      </tr></thead>
+      <tbody>
+        <% rows.forEach(function(r){ %>
+          <tr>
+            <td><%= U.faNum(r.code) %></td>
+            <td><b><%= r.first_name %> <%= r.last_name %></b></td>
+            <% types.forEach(function(t){ const rem = Math.max(0, t.annual_quota - r.used[t.id]); %>
+              <td>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height:6px;min-width:60px">
+                    <div class="progress-bar" style="width:<%= t.annual_quota ? Math.min(100, r.used[t.id]/t.annual_quota*100) : 0 %>%"></div>
+                  </div>
+                  <small>مانده <b><%= U.faNum(rem) %></b></small>
+                </div>
+              </td>
+            <% }) %>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+<%- include('../partials/layout_bottom') %>

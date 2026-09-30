@@ -1,0 +1,97 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-person-gear"></i> کاربران سامانه</h1>
+    <div class="subtitle">حساب‌های ورود و نقش‌ها</div>
+  </div>
+  <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#userModal"><i class="bi bi-plus-lg me-1"></i> کاربر جدید</button>
+</div>
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<div class="card">
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>نام کاربری</th><th>نقش</th><th>متصل به کارمند</th><th>ایمیل</th><th>آخرین ورود</th><th>وضعیت</th><th style="width:230px">عملیات</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function(u){ %>
+          <tr>
+            <td><b dir="ltr" style="text-align:right"><%= u.username %></b></td>
+            <td><span class="badge bg-<%= u.role==='admin'?'danger':(u.role==='hr'?'primary':(u.role==='manager'?'info':'secondary')) %>"><%= roleNames[u.role] || u.role %></span></td>
+            <td><%= u.first_name ? u.first_name + ' ' + u.last_name : '—' %></td>
+            <td dir="ltr" style="text-align:right"><%= u.email || '—' %></td>
+            <td style="font-size:12px"><%= u.last_login ? u.last_login.slice(0,16).replace('T',' ') : '—' %></td>
+            <td><span class="badge bg-<%= u.is_active ? 'success' : 'secondary' %>"><%= u.is_active ? 'فعال' : 'غیرفعال' %></span></td>
+            <td class="text-nowrap">
+              <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#resetModal<%= u.id %>"><i class="bi bi-key"></i></button>
+              <% if (u.id !== user.id) { %>
+                <form class="d-inline" method="post" action="/users/<%= u.id %>/toggle">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <button class="btn btn-sm btn-outline-<%= u.is_active ? 'warning' : 'success' %>"><i class="bi bi-<%= u.is_active ? 'pause' : 'play' %>"></i></button>
+                </form>
+                <form class="d-inline" method="post" action="/users/<%= u.id %>/delete" data-confirm="کاربر حذف شود؟">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+
+<div class="modal fade" id="userModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="/users">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="modal-header"><h5 class="modal-title">کاربر جدید</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <div class="mb-3"><label class="form-label req">نام کاربری (انگلیسی)</label><input class="form-control" name="username" dir="ltr" required pattern="[a-zA-Z0-9_.@-]{3,40}"></div>
+          <div class="mb-3"><label class="form-label req">رمز عبور</label><input type="password" class="form-control" name="password" dir="ltr" required minlength="6"></div>
+          <div class="mb-3"><label class="form-label">ایمیل</label><input type="email" class="form-control" name="email" dir="ltr"></div>
+          <div class="mb-3"><label class="form-label req">نقش</label>
+            <select class="form-select" name="role">
+              <option value="employee">کارمند</option>
+              <option value="manager">مدیر واحد</option>
+              <option value="hr">کارشناس منابع انسانی</option>
+              <% if (user.role === 'admin') { %><option value="admin">مدیر سیستم</option><% } %>
+            </select></div>
+          <div class="mb-2"><label class="form-label">اتصال به پرونده کارمند</label>
+            <select class="form-select" name="employee_id">
+              <option value="">— بدون اتصال —</option>
+              <% emps.forEach(function(e){ %><option value="<%= e.id %>"><%= e.first_name %> <%= e.last_name %> (<%= e.code %>)</option><% }) %>
+            </select>
+            <div class="form-text">با اتصال، کارمند به پنل شخصی (Self-Service) دسترسی پیدا می‌کند.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">انصراف</button>
+          <button class="btn btn-primary">ایجاد کاربر</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<% rows.forEach(function(u){ %>
+<div class="modal fade" id="resetModal<%= u.id %>" tabindex="-1">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+      <form method="post" action="/users/<%= u.id %>/reset-password">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="modal-header"><h5 class="modal-title">ریست رمز: <%= u.username %></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+          <label class="form-label req">رمز جدید</label>
+          <input type="password" class="form-control" name="password" dir="ltr" required minlength="6">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">انصراف</button>
+          <button class="btn btn-primary">تغییر رمز</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<% }) %>
+<%- include('../partials/layout_bottom') %>

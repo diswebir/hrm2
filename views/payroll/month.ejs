@@ -1,0 +1,67 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-cash-stack"></i> لیست حقوق <%= monthNameStr %></h1>
+    <div class="subtitle"><%= U.faNum(rows.length) %> ردیف — وضعیت: <%= allFinal ? 'نهایی شده 🔒' : 'پیش‌نویس (قابل ویرایش)' %></div>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <a class="btn btn-outline-secondary btn-sm" href="/payroll/<%= month %>/export"><i class="bi bi-download me-1"></i> خروجی CSV</a>
+    <% if (!allFinal) { %>
+      <form method="post" action="/payroll/<%= month %>/finalize" data-confirm="لیست نهایی شود؟ پس از آن ویرایش مبالغ مسدود و اقساط وام کسر می‌شود.">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button class="btn btn-success btn-sm"><i class="bi bi-lock me-1"></i> نهایی‌سازی لیست</button>
+      </form>
+    <% } else if (user.role === 'admin') { %>
+      <form method="post" action="/payroll/<%= month %>/reopen" data-confirm="لیست به پیش‌نویس بازگردد؟">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button class="btn btn-outline-warning btn-sm"><i class="bi bi-unlock me-1"></i> بازگشایی</button>
+      </form>
+      <form method="post" action="/payroll/<%= month %>/delete" data-confirm="کل لیست این ماه حذف شود؟">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <button class="btn btn-outline-danger btn-sm"><i class="bi bi-trash"></i></button>
+      </form>
+    <% } %>
+    <a class="btn btn-outline-secondary btn-sm" href="/payroll">بازگشت</a>
+  </div>
+</div>
+<div class="card mb-3">
+  <div class="card-body py-2">
+    <div class="d-flex flex-wrap gap-4" style="font-size:13px">
+      <span>جمع پایه: <b><%= U.money(totals.base, s.currency) %></b></span>
+      <span>اضافه‌کاری: <b><%= U.money(totals.ot, s.currency) %></b></span>
+      <span>مزایا: <b><%= U.money(totals.allowances, s.currency) %></b></span>
+      <span>بیمه: <b><%= U.money(totals.insurance, s.currency) %></b></span>
+      <span>مالیات: <b><%= U.money(totals.tax, s.currency) %></b></span>
+      <span class="text-success">خالص کل: <b><%= U.money(totals.net, s.currency) %></b></span>
+    </div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle" data-sortable>
+      <thead><tr><th>کارمند</th><th>پایه</th><th>کارکرد</th><th>اضافه‌کاری</th><th>مزایا</th><th>کسورات</th><th>بیمه</th><th>مالیات</th><th>وام</th><th>خالص</th><th>وضعیت</th><th></th></tr></thead>
+      <tbody>
+        <% rows.forEach(function(r){ %>
+          <tr>
+            <td><b><%= r.first_name %> <%= r.last_name %></b><br><small class="text-muted2"><%= U.faNum(r.code) %> — <%= r.bank_name || '' %> <%= r.bank_account || '' %></small></td>
+            <td><%= U.moneyPlain(r.base) %></td>
+            <td><%= U.faNum(r.worked_days) %> روز</td>
+            <td><%= r.overtime_amount ? U.moneyPlain(r.overtime_amount) + '<small> (' + U.faNum(r.overtime_hours) + 'س)</small>' : '—' %></td>
+            <td><%= r.allowances ? U.moneyPlain(r.allowances) : '—' %></td>
+            <td><%= r.deductions ? U.moneyPlain(r.deductions) : '—' %></td>
+            <td><%= U.moneyPlain(r.insurance) %></td>
+            <td><%= U.moneyPlain(r.tax) %></td>
+            <td><%= r.loan_deduction ? U.moneyPlain(r.loan_deduction) : '—' %></td>
+            <td><b class="text-success"><%= U.moneyPlain(r.net) %></b></td>
+            <td><span class="badge bg-<%= HH.badgeClass(r.status) %>"><%= U.label(r.status) %></span></td>
+            <td class="text-nowrap">
+              <a class="btn btn-sm btn-outline-primary btn-icon" href="/payroll/slip/<%= r.id %>" title="فیش حقوقی"><i class="bi bi-printer"></i></a>
+              <% if (r.status !== 'final') { %><a class="btn btn-sm btn-outline-secondary btn-icon" href="/payroll/row/<%= r.id %>/edit" title="ویرایش"><i class="bi bi-pencil"></i></a><% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+<%- include('../partials/layout_bottom') %>

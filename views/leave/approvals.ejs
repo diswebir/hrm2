@@ -1,0 +1,35 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-check2-square"></i> تایید درخواست‌های مرخصی</h1>
+    <div class="subtitle"><%= U.faNum(rows.length) %> درخواست در انتظار تصمیم</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>کارمند</th><th>نوع</th><th>بازه</th><th>روز</th><th>دلیل</th><th>تصمیم</th></tr></thead>
+      <tbody>
+        <% if (!rows.length) { %><tr><td colspan="6" class="text-center py-5 empty-state" style="padding:24px"><i class="bi bi-check2-all"></i>همه درخواست‌ها بررسی شده‌اند. 🎉</td></tr><% } %>
+        <% rows.forEach(function(l){ %>
+          <tr>
+            <td><b><%= l.first_name %> <%= l.last_name %></b><br><small class="text-muted2"><%= U.faNum(l.code) %></small></td>
+            <td><span class="badge" style="background:<%= l.color %>"><%= l.type_name %></span></td>
+            <td style="font-size:12.5px"><%= U.jDate(l.from_date) %><br>تا <%= U.jDate(l.to_date) %></td>
+            <td><b><%= U.faNum(l.days) %></b></td>
+            <td style="font-size:12.5px;max-width:170px"><%= l.reason || '—' %></td>
+            <td>
+              <form class="d-flex gap-2" method="post" action="/leave/<%= l.id %>/decide">
+                <input type="hidden" name="_csrf" value="<%= csrf %>">
+                <input type="text" class="form-control form-control-sm" name="note" placeholder="یادداشت">
+                <button class="btn btn-sm btn-success" name="decision" value="approve"><i class="bi bi-check-lg"></i> تایید</button>
+                <button class="btn btn-sm btn-outline-danger" name="decision" value="reject"><i class="bi bi-x-lg"></i> رد</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+<%- include('../partials/layout_bottom') %>

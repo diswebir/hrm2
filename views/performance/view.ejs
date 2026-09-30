@@ -1,0 +1,45 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-clipboard-data"></i> ارزیابی <%= a.first_name %> <%= a.last_name %></h1>
+    <div class="subtitle">دوره: <%= a.cycle_title %></div>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="/appraisals">بازگشت</a>
+</div>
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card text-center mb-3">
+      <div class="card-body py-4">
+        <div style="font-size:46px;font-weight:900;color:<%= a.total >= 4 ? '#16a34a' : (a.total >= 3 ? '#ca8a04' : '#dc2626') %>">
+          <%= U.faNum(a.total) %><small style="font-size:18px"> / ۵</small>
+        </div>
+        <div class="text-muted2">امتیاز نهایی ارزیابی</div>
+      </div>
+    </div>
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-list-check"></i> امتیاز معیارها</div>
+      <ul class="list-group list-group-flush">
+        <% Object.entries(scores).forEach(function(kv){ %>
+          <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+            <span><%= kv[0] %></span>
+            <span>
+              <% for (let i = 1; i <= 5; i++) { %>
+                <i class="bi bi-star<%= i <= kv[1] ? '-fill' : '' %> <%= i <= kv[1] ? 'text-warning' : 'text-muted2' %>"></i>
+              <% } %>
+              <b class="ms-2"><%= U.faNum(kv[1]) %></b>
+            </span>
+          </li>
+        <% }) %>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-header"><i class="bi bi-chat-square-text"></i> بازخورد</div>
+      <div class="card-body">
+        <p><b>نقاط قوت:</b><br><%= a.strengths || '—' %></p>
+        <p><b>فرصت‌های بهبود:</b><br><%= a.improvements || '—' %></p>
+        <p class="mb-0"><b>جمع‌بندی نهایی:</b><br><%= a.final_comment || '—' %></p>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

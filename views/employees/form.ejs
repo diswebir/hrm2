@@ -1,0 +1,106 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title"><h1><i class="bi bi-person-plus"></i> <%= title %></h1></div>
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<form method="post" action="/employees<%= row.id ? '/' + row.id + '/edit' : '/new' %>" enctype="multipart/form-data">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-image"></i> تصویر پرسنلی</div>
+        <div class="card-body text-center">
+          <% if (row.photo) { %><img src="/uploads/<%= row.photo %>" class="avatar-lg mb-2" alt=""><% } else { %><span class="avatar-lg mb-2"><%= row.first_name ? row.first_name.charAt(0) : '👤' %></span><% } %>
+          <input type="file" class="form-control mt-2" name="photo" accept="image/*">
+          <div class="form-text">JPG یا PNG — حداکثر ۱۵ مگابایت</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><i class="bi bi-bank"></i> اطلاعات بانکی و بیمه</div>
+        <div class="card-body">
+          <div class="mb-3"><label class="form-label">بانک</label><input class="form-control" name="bank_name" value="<%= row.bank_name || '' %>"></div>
+          <div class="mb-3"><label class="form-label">شماره حساب / شبا</label><input class="form-control" name="bank_account" value="<%= row.bank_account || '' %>" dir="ltr"></div>
+          <div class="mb-0"><label class="form-label">شماره بیمه</label><input class="form-control" name="insurance_no" value="<%= row.insurance_no || '' %>" dir="ltr"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-person"></i> مشخصات فردی</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label req">نام</label><input class="form-control" name="first_name" value="<%= row.first_name || prefill.prefill_name && prefill.prefill_name.split(' ')[0] || '' %>" required></div>
+            <div class="col-md-4"><label class="form-label req">نام خانوادگی</label><input class="form-control" name="last_name" value="<%= row.last_name || (prefill.prefill_name && prefill.prefill_name.split(' ').slice(1).join(' ')) || '' %>" required></div>
+            <div class="col-md-4"><label class="form-label">نام پدر</label><input class="form-control" name="father_name" value="<%= row.father_name || '' %>"></div>
+            <div class="col-md-4"><label class="form-label">شماره پرسنلی <small class="text-muted2">(خالی = خودکار)</small></label><input class="form-control" name="code" value="<%= row.code || '' %>" dir="ltr"></div>
+            <div class="col-md-4"><label class="form-label">کد ملی</label><input class="form-control" name="national_id" value="<%= row.national_id || '' %>" dir="ltr"></div>
+            <div class="col-md-4"><label class="form-label">جنسیت</label>
+              <select class="form-select" name="gender">
+                <option value="male" <%= row.gender!=='female'?'selected':'' %>>مرد</option>
+                <option value="female" <%= row.gender==='female'?'selected':'' %>>زن</option>
+              </select></div>
+            <div class="col-md-4"><label class="form-label">تاریخ تولد</label><input type="text" class="form-control jdate" name="birth_date" value="<%= row.birth_date ? U.jDateEn(row.birth_date) : '' %>" placeholder="۱۳۷۰/۰۱/۰۱"></div>
+            <div class="col-md-4"><label class="form-label">وضعیت تأهل</label>
+              <select class="form-select" name="marital_status">
+                <option value="single" <%= row.marital_status!=='married'?'selected':'' %>>مجرد</option>
+                <option value="married" <%= row.marital_status==='married'?'selected':'' %>>متأهل</option>
+              </select></div>
+            <div class="col-md-4"><label class="form-label">تعداد فرزند</label><input type="number" class="form-control" name="children_count" value="<%= row.children_count || 0 %>" min="0"></div>
+            <div class="col-md-6"><label class="form-label">تلفن همراه</label><input class="form-control" name="phone" value="<%= row.phone || prefill.prefill_phone || '' %>" dir="ltr"></div>
+            <div class="col-md-6"><label class="form-label">ایمیل</label><input type="email" class="form-control" name="email" value="<%= row.email || prefill.prefill_email || '' %>" dir="ltr"></div>
+            <div class="col-12"><label class="form-label">آدرس</label><textarea class="form-control" name="address" rows="2"><%= row.address || '' %></textarea></div>
+          </div>
+        </div>
+      </div>
+      <div class="card mb-3">
+        <div class="card-header"><i class="bi bi-briefcase"></i> اطلاعات شغلی</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4"><label class="form-label">دپارتمان</label>
+              <select class="form-select" name="department_id"><option value="">—</option>
+                <% Object.entries(opts.depts).forEach(function(kv){ %><option value="<%= kv[0] %>" <%= row.department_id==kv[0] || prefill.prefill_dept==kv[0] ? 'selected':'' %>><%= kv[1] %></option><% }) %></select></div>
+            <div class="col-md-4"><label class="form-label">سمت</label>
+              <select class="form-select" name="designation_id"><option value="">—</option>
+                <% Object.entries(opts.designations).forEach(function(kv){ %><option value="<%= kv[0] %>" <%= row.designation_id==kv[0]?'selected':'' %>><%= kv[1] %></option><% }) %></select></div>
+            <div class="col-md-4"><label class="form-label">شعبه</label>
+              <select class="form-select" name="branch_id"><option value="">—</option>
+                <% Object.entries(opts.branches).forEach(function(kv){ %><option value="<%= kv[0] %>" <%= row.branch_id==kv[0]?'selected':'' %>><%= kv[1] %></option><% }) %></select></div>
+            <div class="col-md-4"><label class="form-label">مدیر مستقیم</label>
+              <select class="form-select" name="manager_id"><option value="">—</option>
+                <% opts.empsList.forEach(function(m){ %><option value="<%= m.id %>" <%= row.manager_id==m.id?'selected':'' %>><%= m.first_name %> <%= m.last_name %></option><% }) %></select></div>
+            <div class="col-md-4"><label class="form-label">شیفت کاری</label>
+              <select class="form-select" name="shift_id"><option value="">— پیش‌فرض اداری —</option>
+                <% Object.entries(opts.shifts).forEach(function(kv){ %><option value="<%= kv[0] %>" <%= row.shift_id==kv[0]?'selected':'' %>><%= kv[1] %></option><% }) %></select></div>
+            <div class="col-md-4"><label class="form-label">تاریخ استخدام</label><input type="text" class="form-control jdate" name="hire_date" value="<%= row.hire_date ? U.jDateEn(row.hire_date) : '' %>"></div>
+            <div class="col-md-4"><label class="form-label">نوع همکاری</label>
+              <select class="form-select" name="contract_type">
+                <% [['full_time','تمام‌وقت'],['part_time','پاره‌وقت'],['contract','قراردادی'],['project','پروژه‌ای'],['intern','کارآموزی']].forEach(function(o){ %>
+                <option value="<%= o[0] %>" <%= row.contract_type===o[0]?'selected':'' %>><%= o[1] %></option><% }) %></select></div>
+            <div class="col-md-4"><label class="form-label">پایان قرارداد فعلی</label><input type="text" class="form-control jdate" name="contract_end" value="<%= row.contract_end ? U.jDateEn(row.contract_end) : '' %>"></div>
+            <div class="col-md-4"><label class="form-label">حقوق پایه ماهانه</label><input class="form-control" name="base_salary" value="<%= row.base_salary ? U.faNum(Number(row.base_salary).toLocaleString('en-US')) : '' %>" placeholder="مثلاً ۲۰٬۰۰۰٬۰۰۰"></div>
+            <div class="col-md-4"><label class="form-label">وضعیت</label>
+              <select class="form-select" name="status" id="empStatus">
+                <option value="active" <%= row.status!=='suspended' && row.status!=='terminated'?'selected':'' %>>شاغل</option>
+                <option value="suspended" <%= row.status==='suspended'?'selected':'' %>>تعلیق</option>
+                <option value="terminated" <%= row.status==='terminated'?'selected':'' %>>خاتمه همکاری</option>
+              </select></div>
+            <div class="col-md-8" id="termReasonWrap" style="display:none">
+              <label class="form-label">دلیل خاتمه همکاری</label><input class="form-control" name="termination_reason" value="<%= row.termination_reason || '' %>">
+            </div>
+            <div class="col-12"><label class="form-label">یادداشت</label><textarea class="form-control" name="notes" rows="2"><%= row.notes || '' %></textarea></div>
+          </div>
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary px-5" style="font-weight:700"><i class="bi bi-check-lg me-1"></i> ذخیره</button>
+        <a class="btn btn-outline-secondary" href="/employees">انصراف</a>
+      </div>
+    </div>
+  </div>
+</form>
+<script>
+  const st = document.getElementById('empStatus');
+  if (st) {
+    const toggle = () => document.getElementById('termReasonWrap').style.display = st.value === 'terminated' ? '' : 'none';
+    st.addEventListener('change', toggle); toggle();
+  }
+</script>
+<%- include('../partials/layout_bottom') %>

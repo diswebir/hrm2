@@ -1,0 +1,149 @@
+<%- include('partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-person-heart"></i> سلام <%= emp ? emp.first_name : user.username %> 👋</h1>
+    <div class="subtitle"><%= U.jDate(today, {withWeekday:true}) %> — ساعت <%= U.faNum(nowTime) %></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-alarm"></i> حضور امروز</div>
+      <div class="card-body">
+        <% if (att && att.check_in && att.check_out) { %>
+          <div class="d-flex flex-wrap gap-4 align-items-center">
+            <div><small class="text-muted2 d-block">ورود</small><b style="font-size:20px"><%= U.faNum(att.check_in) %></b></div>
+            <div><small class="text-muted2 d-block">خروج</small><b style="font-size:20px"><%= U.faNum(att.check_out) %></b></div>
+            <div><small class="text-muted2 d-block">کارکرد</small><b style="font-size:20px"><%= U.faNum(Math.round(att.worked_minutes/60*10)/10) %> ساعت</b></div>
+            <% if (att.late_minutes > 0) { %><span class="badge bg-warning text-dark">تأخیر <%= U.faNum(att.late_minutes) %> دقیقه</span><% } %>
+          </div>
+        <% } else if (att && att.check_in) { %>
+          <div class="d-flex flex-wrap gap-3 align-items-center">
+            <div><small class="text-muted2 d-block">ورود</small><b style="font-size:20px"><%= U.faNum(att.check_in) %></b></div>
+            <% if (att.late_minutes > 0) { %><span class="badge bg-warning text-dark">تأخیر <%= U.faNum(att.late_minutes) %> دقیقه</span><% } %>
+            <span class="text-muted2">خروج ثبت نشده است.</span>
+            <form method="post" action="/attendance/self" class="me-auto">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <button class="btn btn-danger"><i class="bi bi-box-arrow-right me-1"></i> ثبت خروج</button>
+            </form>
+          </div>
+        <% } else if (att && att.status !== 'present') { %>
+          <p class="mb-0">وضعیت امروز: <span class="badge bg-secondary"><%= U.label(att.status) %></span></p>
+        <% } else { %>
+          <div class="d-flex align-items-center gap-3">
+            <span class="text-muted2">هنوز ورودی ثبت نکرده‌اید.</span>
+            <% if (emp && emp.status === 'active') { %>
+            <form method="post" action="/attendance/self">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <button class="btn btn-success"><i class="bi bi-box-arrow-in-left me-1"></i> ثبت ورود</button>
+            </form>
+            <% } %>
+          </div>
+        <% } %>
+        <% if (shift) { %><div class="form-text mt-2">شیفت شما: <%= shift.name %> (<%= U.faNum(shift.start_time) %> تا <%= U.faNum(shift.end_time) %>)</div><% } %>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-megaphone"></i> اطلاعیه‌ها</div>
+      <div class="card-body p-0">
+        <% if (!announcements.length) { %><div class="empty-state" style="padding:18px">اطلاعیه‌ای وجود ندارد.</div>
+        <% } else { %><ul class="list-group list-group-flush">
+          <% announcements.forEach(function(a){ %>
+            <li class="list-group-item bg-transparent">
+              <a href="/announcements/view/<%= a.id %>" class="fw-bold"><%= a.pinned ? '📌 ' : '' %><%= a.title %></a>
+              <small class="text-muted2 d-block" style="font-size:11.5px"><%= String(a.body||'').slice(0,90) %></small>
+            </li>
+          <% }) %>
+        </ul><% } %>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="bi bi-clock-history"></i> درخواست‌های اخیر من</div>
+      <div class="card-body p-0">
+        <% if (!myRequests.length) { %><div class="empty-state" style="padding:18px">درخواستی ثبت نکرده‌اید.</div>
+        <% } else { %><div class="table-wrap"><table class="table align-middle">
+          <thead><tr><th>نوع</th><th>تاریخ</th><th>وضعیت</th></tr></thead>
+          <tbody>
+            <% myRequests.forEach(function(r){ %>
+              <tr>
+                <td><%= r.kind === 'leave' ? 'مرخصی' : (r.kind === 'overtime' ? 'اضافه‌کاری' : 'هزینه') %></td>
+                <td style="font-size:12px"><%= U.jDate(r.d1) %></td>
+                <td><span class="badge bg-<%= HH.badgeClass(r.status) %>"><%= U.label(r.status) %></span></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table></div><% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-calendar2-check"></i> مانده مرخصی سال جاری</div>
+      <div class="card-body p-0">
+        <% if (!balances.length) { %><div class="empty-state" style="padding:18px">نوع مرخصی تعریف نشده است.</div>
+        <% } else { %><ul class="list-group list-group-flush">
+          <% balances.forEach(function(b){ %>
+            <li class="list-group-item bg-transparent">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span><span class="badge" style="background:<%= b.color %>">&nbsp;</span> <%= b.name %></span>
+                <small><b><%= U.faNum(b.remaining) %></b> <span class="text-muted2">از <%= U.faNum(b.annual_quota) %> روز مانده</span></small>
+              </div>
+              <div class="progress" style="height:6px">
+                <div class="progress-bar" style="width:<%= b.annual_quota ? Math.min(100, b.used/b.annual_quota*100) : 0 %>%"></div>
+              </div>
+            </li>
+          <% }) %>
+        </ul><% } %>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-wallet2"></i> آخرین فیش حقوقی</div>
+      <div class="card-body">
+        <% if (payslip) { %>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted2">ماه</span><b><%= payslip.month.replace('-', '/') %></b>
+          </div>
+          <div class="d-flex justify-content-between mb-2">
+            <span class="text-muted2">خالص پرداختی</span><b class="text-success"><%= U.money(payslip.net, currency) %></b>
+          </div>
+          <a href="/payroll/slip/<%= payslip.id %>" class="btn btn-outline-primary btn-sm"><i class="bi bi-printer me-1"></i> مشاهده و چاپ فیش</a>
+        <% } else { %><div class="empty-state" style="padding:14px">فیشی صادر نشده است.</div><% } %>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-bullseye"></i> اهداف جاری من</div>
+      <div class="card-body p-0">
+        <% if (!goals.length) { %><div class="empty-state" style="padding:14px">هدفی تعریف نشده است.</div>
+        <% } else { %><ul class="list-group list-group-flush">
+          <% goals.forEach(function(g){ %>
+            <li class="list-group-item bg-transparent">
+              <div class="d-flex justify-content-between mb-1"><span style="font-size:13px"><%= g.title %></span><small><%= U.faNum(g.progress) %>٪</small></div>
+              <div class="progress" style="height:6px"><div class="progress-bar" style="width:<%= g.progress %>%"></div></div>
+            </li>
+          <% }) %>
+        </ul><% } %>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><i class="bi bi-calendar-event"></i> رویدادهای پیش‌رو</div>
+      <div class="card-body p-0">
+        <% if (!upcomingEvents.length) { %><div class="empty-state" style="padding:14px">رویدادی ثبت نشده است.</div>
+        <% } else { %><ul class="list-group list-group-flush">
+          <% upcomingEvents.forEach(function(ev){ %>
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+              <span><i class="bi bi-dot"></i><%= ev.title %></span><small class="text-muted2"><%= U.jDate(ev.date) %></small>
+            </li>
+          <% }) %>
+        </ul><% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('partials/layout_bottom') %>

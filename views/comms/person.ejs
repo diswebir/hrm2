@@ -1,0 +1,34 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body text-center p-4">
+        <% if (e.photo) { %><img src="/uploads/<%= e.photo %>" class="avatar-lg mb-3" alt="">
+        <% } else { %><span class="avatar-lg mb-3"><%= e.first_name.charAt(0) %></span><% } %>
+        <h2 style="font-size:20px;font-weight:900"><%= e.first_name %> <%= e.last_name %></h2>
+        <div class="text-muted2 mb-3"><%= e.desig_name || '—' %> — <%= e.dept_name || '—' %></div>
+        <div class="row g-2 text-start" style="font-size:13.5px">
+          <div class="col-6"><b>شماره پرسنلی:</b> <%= U.faNum(e.code) %></div>
+          <div class="col-6"><b>شعبه:</b> <%= e.branch_name || '—' %></div>
+          <div class="col-6"><b>تلفن:</b> <span dir="ltr"><%= e.phone || '—' %></span></div>
+          <div class="col-6"><b>ایمیل:</b> <span dir="ltr"><%= e.email || '—' %></span></div>
+          <div class="col-6"><b>تاریخ استخدام:</b> <%= U.jDate(e.hire_date) %></div>
+          <div class="col-6"><b>مدیر:</b> <%= e.mgr_first ? e.mgr_first + ' ' + e.mgr_last : '—' %></div>
+        </div>
+        <% if (skills.length) { %>
+          <hr>
+          <div class="text-start">
+            <b style="font-size:13.5px">مهارت‌ها:</b>
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <% skills.forEach(function(s){ %>
+                <span class="badge bg-primary-subtle text-primary"><%= s.skill %> — <%= U.faNum(s.level) %>/۵</span>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+    <a href="/directory" class="btn btn-outline-secondary btn-sm mt-3">بازگشت به دایرکتوری</a>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

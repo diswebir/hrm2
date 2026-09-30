@@ -1,0 +1,68 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-mortarboard"></i> <%= t.title %></h1>
+    <div class="subtitle"><%= t.provider || '—' %> • <%= U.jDate(t.from_date) %> تا <%= U.jDate(t.to_date) %> • ظرفیت <%= U.faNum(t.capacity) %> نفر</div>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <form method="post" action="/trainings/<%= t.id %>/status" class="d-flex gap-2">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <select class="form-select form-select-sm" name="status">
+        <% [['planned','برنامه‌ریزی شده'],['ongoing','در حال اجرا'],['completed','تکمیل شده'],['cancelled','لغو شده']].forEach(function(o){ %>
+          <option value="<%= o[0] %>" <%= t.status===o[0]?'selected':'' %>><%= o[1] %></option><% }) %>
+      </select>
+      <button class="btn btn-sm btn-outline-secondary">ثبت وضعیت</button>
+    </form>
+    <a class="btn btn-outline-secondary btn-sm" href="/trainings/<%= t.id %>/edit">ویرایش دوره</a>
+    <a class="btn btn-outline-secondary btn-sm" href="/trainings">بازگشت</a>
+  </div>
+</div>
+<% if (error) { %><div class="alert alert-warning"><%= error %></div><% } %>
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-people"></i> شرکت‌کنندگان (<%= U.faNum(enrollments.length) %>)</div>
+      <div class="card-body p-0">
+        <% if (!enrollments.length) { %><div class="empty-state" style="padding:20px">هنوز کسی ثبت‌نام نکرده است.</div>
+        <% } else { %><div class="table-wrap p-3"><table class="table align-middle">
+          <thead><tr><th>کارمند</th><th>وضعیت</th><th>نمره</th><th>گواهی</th><th></th></tr></thead>
+          <tbody>
+            <% enrollments.forEach(function(en){ %>
+              <tr>
+                <td><b><%= en.first_name %> <%= en.last_name %></b><br><small class="text-muted2"><%= U.faNum(en.code) %></small></td>
+                <td><span class="badge bg-<%= HH.badgeClass(en.status) %>"><%= U.label(en.status) %></span></td>
+                <td><%= en.score ? U.faNum(en.score) : '—' %></td>
+                <td><% if (en.certificate_path) { %><a href="/files/cert/<%= en.id %>" class="btn btn-sm btn-outline-secondary btn-icon"><i class="bi bi-download"></i></a><% } else { %>—<% } %></td>
+                <td><a class="btn btn-sm btn-outline-secondary btn-icon" href="/enrollments/<%= en.id %>/edit" title="ویرایش نتیجه"><i class="bi bi-pencil"></i></a></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table></div><% } %>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-person-plus"></i> ثبت‌نام شرکت‌کننده جدید</div>
+      <div class="card-body">
+        <% if (!emps.length) { %><div class="alert alert-info mb-0">همه کارکنان فعال ثبت‌نام شده‌اند.</div>
+        <% } else { %>
+        <form method="post" action="/trainings/<%= t.id %>/enroll">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <select class="form-select mb-3" name="employee_id" required>
+            <option value="">— انتخاب کارمند —</option>
+            <% emps.forEach(function(e){ %><option value="<%= e.id %>"><%= e.first_name %> <%= e.last_name %></option><% }) %>
+          </select>
+          <button class="btn btn-primary w-100"><i class="bi bi-check-lg me-1"></i> ثبت‌نام</button>
+        </form>
+        <% } %>
+        <hr>
+        <div class="text-muted2" style="font-size:12.5px">
+          <div>هزینه دوره: <b><%= U.money(t.cost, s.currency) %></b></div>
+          <div>مکان: <%= t.location || '—' %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

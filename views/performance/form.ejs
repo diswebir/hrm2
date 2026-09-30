@@ -1,0 +1,73 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title"><h1><i class="bi bi-clipboard-plus"></i> <%= title %></h1></div>
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<div class="card">
+  <div class="card-body">
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label req">دوره ارزیابی</label>
+        <select class="form-select" name="cycle_id" id="cycleSel">
+          <option value="">— انتخاب کنید —</option>
+          <% cycles.forEach(function(c){ %><option value="<%= c.id %>" <%= cycleId==String(c.id)?'selected':'' %>><%= c.title %></option><% }) %>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label req">کارمند</label>
+        <select class="form-select" name="employee_id" id="empSel">
+          <option value="">— انتخاب کنید —</option>
+          <% emps.forEach(function(e){ %><option value="<%= e.id %>" <%= empId==String(e.id)?'selected':'' %>><%= e.first_name %> <%= e.last_name %> (<%= e.code %>)</option><% }) %>
+        </select>
+      </div>
+    </div>
+    <div id="criteriaBox" class="border-top pt-3">
+      <p class="text-muted2" style="font-size:13px">پس از انتخاب دوره، معیارهای آن اینجا نمایش داده می‌شود.</p>
+    </div>
+    <form method="post" action="/appraisals/new" id="appraisalForm">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <input type="hidden" name="cycle_id" id="fCycle">
+      <input type="hidden" name="employee_id" id="fEmp">
+      <div id="scoresWrap"></div>
+      <div class="row g-3 mt-2" id="commentBox" style="display:none">
+        <div class="col-md-4"><label class="form-label">نقاط قوت</label><textarea class="form-control" name="strengths" rows="3"></textarea></div>
+        <div class="col-md-4"><label class="form-label">فرصت‌های بهبود</label><textarea class="form-control" name="improvements" rows="3"></textarea></div>
+        <div class="col-md-4"><label class="form-label">جمع‌بندی نهایی</label><textarea class="form-control" name="final_comment" rows="3"></textarea></div>
+      </div>
+      <button class="btn btn-primary mt-3" style="font-weight:700;display:none" id="submitBtn"><i class="bi bi-check-lg me-1"></i> ثبت ارزیابی</button>
+    </form>
+  </div>
+</div>
+<script>
+  const cycleSel = document.getElementById('cycleSel');
+  const empSel = document.getElementById('empSel');
+  const wrap = document.getElementById('scoresWrap');
+  const box = document.getElementById('criteriaBox');
+  const submitBtn = document.getElementById('submitBtn');
+  const commentBox = document.getElementById('commentBox');
+  function sync() {
+    document.getElementById('fCycle').value = cycleSel.value;
+    document.getElementById('fEmp').value = empSel.value;
+  }
+  cycleSel.addEventListener('change', function () {
+    sync();
+    if (!cycleSel.value) return;
+    fetch('/appraisals/criteria/' + cycleSel.value)
+      .then(r => r.json())
+      .then(d => {
+        if (!d.criteria.length) { box.innerHTML = '<div class="alert alert-warning">این دوره معیاری ندارد.</div>'; return; }
+        box.innerHTML = '<b class="d-block mb-2"><i class="bi bi-list-check me-1"></i> امتیازدهی معیارها (۱ تا ۵):</b>';
+        d.criteria.forEach(function (c) {
+          let opts = '';
+          for (let i = 1; i <= 5; i++) opts += `<option value="${i}">${i}</option>`;
+          box.innerHTML += `<div class="row align-items-center mb-2 g-2">
+            <div class="col-md-6"><b style="font-size:13.5px">${c}</b></div>
+            <div class="col-md-6"><select class="form-select form-select-sm" name="${c}">${opts}</select></div></div>`;
+        });
+        commentBox.style.display = '';
+        submitBtn.style.display = '';
+      });
+  });
+  empSel.addEventListener('change', sync);
+  <% if (cycleId) { %>cycleSel.dispatchEvent(new Event('change'));<% } %>
+  sync();
+</script>
+<%- include('../partials/layout_bottom') %>

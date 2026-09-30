@@ -1,0 +1,52 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title"><h1><i class="bi bi-person-plus"></i> <%= title %></h1></div>
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-body">
+        <form method="post" action="/candidates<%= row.id ? '/' + row.id + '/edit' : '/new' %>" enctype="multipart/form-data">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label req">نام و نام خانوادگی</label>
+              <input class="form-control" name="name" value="<%= row.name || '' %>" required></div>
+            <div class="col-md-6"><label class="form-label req">آگهی شغلی</label>
+              <select class="form-select" name="posting_id" required>
+                <option value="">— انتخاب کنید —</option>
+                <% postings.forEach(function(p){ %><option value="<%= p.id %>" <%= row.posting_id==p.id?'selected':'' %>><%= p.title %></option><% }) %>
+              </select></div>
+            <div class="col-md-4"><label class="form-label">ایمیل</label><input type="email" class="form-control" name="email" value="<%= row.email || '' %>" dir="ltr"></div>
+            <div class="col-md-4"><label class="form-label">تلفن</label><input class="form-control" name="phone" value="<%= row.phone || '' %>" dir="ltr"></div>
+            <div class="col-md-4"><label class="form-label">منبع آشنایی</label>
+              <select class="form-select" name="source">
+                <% [['website','وب‌سایت'],['linkedin','لینکدین'],['referral','معرفی همکار'],['agency','آژانس کاریابی'],['other','سایر']].forEach(function(o){ %>
+                  <option value="<%= o[0] %>" <%= row.source===o[0]?'selected':'' %>><%= o[1] %></option><% }) %>
+              </select></div>
+            <div class="col-md-4"><label class="form-label">حقوق مورد انتظار</label>
+              <input class="form-control" name="expected_salary" value="<%= row.expected_salary ? U.faNum(Number(row.expected_salary).toLocaleString('en-US')) : '' %>"></div>
+            <div class="col-md-4"><label class="form-label">امتیاز (۱-۵)</label>
+              <select class="form-select" name="rating">
+                <option value="0">—</option>
+                <% for (let i = 1; i <= 5; i++) { %><option value="<%= i %>" <%= row.rating===i?'selected':'' %>><%= U.faNum(i) %></option><% } %>
+              </select></div>
+            <div class="col-md-4"><label class="form-label">مرحله</label>
+              <select class="form-select" name="stage">
+                <% [['new','جدید'],['screening','بررسی رزومه'],['interview','مصاحبه'],['offer','پیشنهاد'],['hired','استخدام شده'],['rejected','رد شده']].forEach(function(o){ %>
+                  <option value="<%= o[0] %>" <%= row.stage===o[0]?'selected':'' %>><%= o[1] %></option><% }) %>
+              </select></div>
+            <div class="col-md-6"><label class="form-label">رزومه (PDF/Word)</label>
+              <input type="file" class="form-control" name="resume" accept=".pdf,.doc,.docx">
+              <% if (row.resume_path) { %><small class="form-text d-block">فایل فعلی: <code dir="ltr"><%= row.resume_path %></code></small><input type="hidden" name="existing_file" value="<%= row.resume_path %>"><% } %></div>
+            <div class="col-md-6"><label class="form-label">یادداشت / چکیده گفت‌وگو</label>
+              <textarea class="form-control" name="note" rows="2"><%= row.note || row.cover_note || '' %></textarea></div>
+          </div>
+          <div class="d-flex gap-2 mt-4 pt-3 border-top">
+            <button class="btn btn-primary px-4" style="font-weight:700">ذخیره</button>
+            <a class="btn btn-outline-secondary" href="/candidates">انصراف</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

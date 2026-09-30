@@ -1,0 +1,68 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-clock-history"></i> حضور روزانه</h1>
+    <div class="subtitle"><%= U.jDate(date, {withWeekday:true}) %><%= holiday ? ' — 🎉 ' + holiday.title : '' %></div>
+  </div>
+  <div class="d-flex gap-2">
+    <form class="d-flex gap-2" method="get" action="/attendance">
+      <input type="text" class="form-control form-control-sm jdate" name="date" value="<%= U.jDateEn(date) %>" placeholder="تاریخ">
+      <select class="form-select form-select-sm" name="dept" onchange="this.form.submit()">
+        <option value="">همه واحدها</option>
+        <% depts.forEach(function(d){ %><option value="<%= d.id %>" <%= dept==String(d.id)?'selected':'' %>><%= d.name %></option><% }) %>
+      </select>
+      <button class="btn btn-sm btn-primary">نمایش</button>
+    </form>
+    <a class="btn btn-outline-secondary btn-sm" href="/attendance/report"><i class="bi bi-journal-text me-1"></i> گزارش</a>
+  </div>
+</div>
+<%- include('../partials/flash') %>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-wrap p-3">
+      <table class="table table-hover align-middle">
+        <thead><tr><th>کارمند</th><th>واحد</th><th>شیفت</th><th>ورود</th><th>خروج</th><th>تأخیر</th><th>وضعیت</th><th style="width:270px">ثبت/اصلاح دستی</th></tr></thead>
+        <tbody>
+          <% emps.forEach(function(e){ const rec = byEmp[e.id]; %>
+            <tr>
+              <td><b><%= e.first_name %> <%= e.last_name %></b><br><small class="text-muted2"><%= U.faNum(e.code) %></small></td>
+              <td><%= e.dept_name || '—' %></td>
+              <td style="font-size:12px"><%= e.shift_name || 'پیش‌فرض' %><br><small class="text-muted2"><%= e.shift_start || '09:00' %> - <%= e.shift_end || '17:00' %></small></td>
+              <td><%= rec && rec.check_in ? U.faNum(rec.check_in) : '—' %></td>
+              <td><%= rec && rec.check_out ? U.faNum(rec.check_out) : '—' %></td>
+              <td><%= rec && rec.late_minutes ? '<span class="badge bg-warning text-dark">' + U.faNum(rec.late_minutes) + ' د</span>' : '—' %></td>
+              <td>
+                <% if (rec) { %><span class="badge bg-<%= rec.status==='present'?'success':(rec.status==='absent'?'danger':(rec.status==='leave'?'info':'secondary')) %>"><%= U.label(rec.status) %></span>
+                <% } else { %><span class="badge bg-light text-dark">ثبت نشده</span><% } %>
+              </td>
+              <td>
+                <form class="row g-1 align-items-center" method="post" action="/attendance/save">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <input type="hidden" name="employee_id" value="<%= e.id %>">
+                  <input type="hidden" name="date" value="<%= U.jDateEn(date) %>">
+                  <div class="col-3"><input type="time" class="form-control form-control-sm" name="check_in" value="<%= rec ? rec.check_in : '' %>"></div>
+                  <div class="col-3"><input type="time" class="form-control form-control-sm" name="check_out" value="<%= rec ? rec.check_out : '' %>"></div>
+                  <div class="col-4">
+                    <select class="form-select form-select-sm" name="status">
+                      <% [['','— وضعیت —'],['present','حاضر'],['absent','غایب'],['leave','مرخصی'],['mission','مأموریت']].forEach(function(o){ %>
+                        <option value="<%= o[0] %>" <%= rec && rec.status===o[0]?'selected':'' %>><%= o[1] %></option>
+                      <% }) %>
+                    </select>
+                  </div>
+                  <div class="col-2"><button class="btn btn-sm btn-primary w-100"><i class="bi bi-check-lg"></i></button></div>
+                </form>
+                <% if (rec) { %>
+                  <form method="post" action="/attendance/<%= rec.id %>/delete" class="mt-1" data-confirm="رکورد حذف شود؟">
+                    <input type="hidden" name="_csrf" value="<%= csrf %>">
+                    <button class="btn btn-sm btn-outline-danger" style="font-size:11px">حذف رکورد</button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

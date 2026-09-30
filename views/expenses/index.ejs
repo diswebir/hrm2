@@ -1,0 +1,52 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-receipt"></i> هزینه‌ها<%= mine ? ' — درخواست‌های من' : '' %></h1>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="/reports/expenses"><i class="bi bi-bar-chart me-1"></i> گزارش هزینه</a>
+    <a class="btn btn-primary btn-sm" href="/expenses/new"><i class="bi bi-plus-lg me-1"></i> درخواست هزینه</a>
+  </div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-4"><div class="kpi text-center py-3"><div class="k-val" style="color:#ca8a04"><%= U.moneyPlain(totals.pending) %></div><div class="k-label">در انتظار (<%= s.currency %>)</div></div></div>
+  <div class="col-4"><div class="kpi text-center py-3"><div class="k-val" style="color:#2563eb"><%= U.moneyPlain(totals.approved) %></div><div class="k-label">تاییدشده</div></div></div>
+  <div class="col-4"><div class="kpi text-center py-3"><div class="k-val" style="color:#16a34a"><%= U.moneyPlain(totals.paid) %></div><div class="k-label">پرداخت‌شده</div></div></div>
+</div>
+<div class="card">
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle" data-sortable>
+      <thead><tr><th>کارمند</th><th>عنوان</th><th>دسته</th><th>مبلغ</th><th>تاریخ</th><th>رسید</th><th>وضعیت</th><th></th></tr></thead>
+      <tbody>
+        <% if (!rows.length) { %><tr><td colspan="8" class="text-center text-muted2 py-4">درخواستی وجود ندارد.</td></tr><% } %>
+        <% rows.forEach(function(x){ %>
+          <tr>
+            <td><b><%= x.first_name %> <%= x.last_name %></b></td>
+            <td><%= x.title %><% if (x.description) { %><br><small class="text-muted2"><%= x.description %></small><% } %></td>
+            <td><%= categories[x.category] || x.category %></td>
+            <td><b><%= U.moneyPlain(x.amount) %></b></td>
+            <td style="font-size:12.5px"><%= U.jDate(x.date) %></td>
+            <td><% if (x.receipt_path) { %><a href="/files/receipt/<%= x.id %>" class="btn btn-sm btn-outline-secondary btn-icon" title="رسید"><i class="bi bi-paperclip"></i></a><% } else { %>—<% } %></td>
+            <td><span class="badge bg-<%= HH.badgeClass(x.status) %>"><%= U.label(x.status) %></span>
+              <% if (x.decision_note) { %><small class="d-block text-muted2" style="font-size:11px"><%= x.decision_note %></small><% } %></td>
+            <td>
+              <% if (!mine && x.status === 'pending') { %>
+                <form class="d-flex gap-1" method="post" action="/expenses/<%= x.id %>/decide">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <button class="btn btn-sm btn-success" name="decision" value="approve"><i class="bi bi-check-lg"></i></button>
+                  <button class="btn btn-sm btn-outline-danger" name="decision" value="reject"><i class="bi bi-x-lg"></i></button>
+                </form>
+              <% } else if (!mine && x.status === 'approved') { %>
+                <form method="post" action="/expenses/<%= x.id %>/decide">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <button class="btn btn-sm btn-outline-success" name="decision" value="paid"><i class="bi bi-cash me-1"></i> پرداخت شد</button>
+                </form>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+<%- include('../partials/layout_bottom') %>

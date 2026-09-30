@@ -1,0 +1,52 @@
+<%- include('partials/layout_top', {title: title}) %>
+<div class="page-title"><h1><i class="bi bi-person"></i> پروفایل من</h1></div>
+<% if (done) { %><div class="alert alert-success">اطلاعات تماس به‌روزرسانی شد.</div><% } %>
+<% if (!emp) { %>
+  <div class="card"><div class="empty-state"><i class="bi bi-person-x"></i>حساب شما به پرونده کارمندی متصل نیست. با مدیر سامانه تماس بگیرید.</div></div>
+<% } else { %>
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card text-center">
+      <div class="card-body p-4">
+        <% if (emp.photo) { %><img src="/uploads/<%= emp.photo %>" class="avatar-lg mb-3" alt="">
+        <% } else { %><span class="avatar-lg mb-3"><%= emp.first_name.charAt(0) %></span><% } %>
+        <h5 style="font-weight:800"><%= emp.first_name %> <%= emp.last_name %></h5>
+        <div class="text-muted2 mb-1"><%= emp.desig_name || '—' %></div>
+        <div class="text-muted2"><%= emp.dept_name || '—' %></div>
+        <hr>
+        <table class="table table-sm table-borderless text-start mb-0" style="font-size:13px">
+          <tr><td class="text-muted2">شماره پرسنلی</td><td><%= U.faNum(emp.code) %></td></tr>
+          <tr><td class="text-muted2">تاریخ استخدام</td><td><%= U.jDate(emp.hire_date) %></td></tr>
+          <tr><td class="text-muted2">نوع همکاری</td><td><%= U.label(emp.contract_type) %></td></tr>
+        </table>
+        <a href="/change-password" class="btn btn-outline-secondary btn-sm mt-2"><i class="bi bi-key me-1"></i> تغییر رمز عبور</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-pencil-square"></i> ویرایش اطلاعات تماس (قابل ویرایش توسط شما)</div>
+      <div class="card-body">
+        <form method="post" action="/profile/contact">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">تلفن همراه</label>
+              <input class="form-control" name="phone" value="<%= emp.phone || '' %>" dir="ltr"></div>
+            <div class="col-md-6"><label class="form-label">ایمیل</label>
+              <input type="email" class="form-control" name="email" value="<%= emp.email || '' %>" dir="ltr"></div>
+            <div class="col-12"><label class="form-label">آدرس</label>
+              <textarea class="form-control" name="address" rows="2"><%= emp.address || '' %></textarea></div>
+          </div>
+          <button class="btn btn-primary mt-3">ذخیره</button>
+        </form>
+        <hr>
+        <p class="text-muted2 mb-0" style="font-size:12.5px">
+          سایر اطلاعات پرونده (سمت، حقوق، قرارداد و...) فقط توسط منابع انسانی قابل تغییر است.
+          برای اصلاح، درخواست خود را از بخش تیکت‌ها ثبت کنید.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<% } %>
+<%- include('partials/layout_bottom') %>

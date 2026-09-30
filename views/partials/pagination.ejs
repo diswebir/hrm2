@@ -1,0 +1,23 @@
+<%
+  function qs(p) {
+    const pr = new URLSearchParams();
+    Object.entries(q || {}).forEach(function (kv) {
+      if (kv[0] !== 'page' && kv[1] !== null && kv[1] !== undefined && kv[1] !== '') pr.set(kv[0], String(kv[1]));
+    });
+    if (p > 1) pr.set('page', String(p));
+    const str = pr.toString();
+    return str ? '?' + str : '?';
+  }
+%>
+<% if (pages > 1) { %>
+<nav class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+  <small class="text-muted2">مجموع <%= U.faNum(total) %> رکورد — صفحه <%= U.faNum(page) %> از <%= U.faNum(pages) %></small>
+  <ul class="pagination pagination-sm mb-0">
+    <li class="page-item <%= page<=1?'disabled':'' %>"><a class="page-link" href="<%= qs(page-1) %>">&laquo;</a></li>
+    <% for (let i = Math.max(1, page-2); i <= Math.min(pages, page+2); i++) { %>
+      <li class="page-item <%= i===page?'active':'' %>"><a class="page-link" href="<%= qs(i) %>"><%= U.faNum(i) %></a></li>
+    <% } %>
+    <li class="page-item <%= page>=pages?'disabled':'' %>"><a class="page-link" href="<%= qs(page+1) %>">&raquo;</a></li>
+  </ul>
+</nav>
+<% } %>

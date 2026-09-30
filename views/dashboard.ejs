@@ -1,0 +1,206 @@
+<%- include('partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-speedometer2"></i> داشبورد مدیریتی</h1>
+    <div class="subtitle"><%= U.jDate(U.todayIso(tz), {withWeekday:true}) %> — <%= s.company_name %></div>
+  </div>
+</div>
+
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3"><div class="kpi">
+    <div class="k-icon" style="background:rgba(79,70,229,.12);color:#4f46e5"><i class="bi bi-people"></i></div>
+    <div class="k-val"><%= U.faNum(stats.activeEmp) %></div><div class="k-label">کارکنان فعال</div>
+  </div></div>
+  <div class="col-6 col-md-3"><div class="kpi">
+    <div class="k-icon" style="background:rgba(22,163,74,.12);color:#16a34a"><i class="bi bi-person-check"></i></div>
+    <div class="k-val"><%= U.faNum(stats.presentToday) %></div><div class="k-label">حاضر امروز</div>
+  </div></div>
+  <div class="col-6 col-md-3"><div class="kpi">
+    <div class="k-icon" style="background:rgba(37,99,235,.12);color:#2563eb"><i class="bi bi-calendar2-check"></i></div>
+    <div class="k-val"><%= U.faNum(stats.onLeaveToday) %></div><div class="k-label">در مرخصی امروز</div>
+  </div></div>
+  <div class="col-6 col-md-3"><div class="kpi">
+    <div class="k-icon" style="background:rgba(234,179,8,.15);color:#ca8a04"><i class="bi bi-hourglass-split"></i></div>
+    <div class="k-val"><%= U.faNum(stats.pendingLeaves + stats.pendingOt + stats.pendingExp) %></div><div class="k-label">در انتظار تایید</div>
+  </div></div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-graph-up-arrow"></i> رشد استخدام (۱۲ ماه اخیر)</div>
+      <div class="card-body"><div class="chart-box"><canvas id="chartHires"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-pie-chart"></i> توزیع دپارتمانی</div>
+      <div class="card-body"><div class="chart-box"><canvas id="chartDept"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-bar-chart"></i> حضور هفته اخیر</div>
+      <div class="card-body"><div class="chart-box"><canvas id="chartWeek"></canvas></div></div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-cash-stack"></i> روند هزینه حقوق</div>
+      <div class="card-body">
+        <% if (!charts.payrollTrend.length) { %>
+          <div class="empty-state"><i class="bi bi-wallet2"></i>هنوز لیست حقوق نهایی‌شده‌ای ثبت نشده است.</div>
+        <% } else { %><div class="chart-box"><canvas id="chartPayroll"></canvas></div><% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-hourglass"></i> درخواست‌های در انتظار تایید</div>
+      <div class="card-body p-0">
+        <% if (!pendingApprovals.length) { %><div class="empty-state" style="padding:22px"><i class="bi bi-check2-all"></i>درخواست در انتظاری وجود ندارد.</div>
+        <% } else { %>
+        <div class="table-wrap"><table class="table align-middle">
+          <thead><tr><th>کارمند</th><th>نوع</th><th>بازه</th><th>روز</th><th></th></tr></thead>
+          <tbody>
+            <% pendingApprovals.forEach(function(p){ %>
+            <tr>
+              <td><b><%= p.first_name %> <%= p.last_name %></b></td>
+              <td><span class="badge" style="background:<%= p.color %>"><%= p.type_name %></span></td>
+              <td style="font-size:12px"><%= U.jDate(p.from_date) %> تا <%= U.jDate(p.to_date) %></td>
+              <td><%= U.faNum(p.days) %></td>
+              <td class="text-nowrap">
+                <form class="d-inline" method="post" action="/leave/<%= p.id %>/decide">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="decision" value="approve">
+                  <button class="btn btn-sm btn-success btn-icon" title="تایید"><i class="bi bi-check-lg"></i></button>
+                </form>
+                <a class="btn btn-sm btn-outline-secondary btn-icon" href="/leave/approvals" title="مشاهده همه"><i class="bi bi-list"></i></a>
+              </td>
+            </tr>
+            <% }) %>
+          </tbody>
+        </table></div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-exclamation-triangle"></i> قراردادها و مدارک در حال انقضا</div>
+      <div class="card-body p-0">
+        <% if (!expiringContracts.length && !expiringDocs.length) { %><div class="empty-state" style="padding:22px"><i class="bi bi-check2-circle"></i>موردی در ۳۰ روز آینده منقضی نمی‌شود.</div>
+        <% } else { %>
+        <div class="table-wrap"><table class="table align-middle">
+          <thead><tr><th>کارمند</th><th>مورد</th><th>تاریخ انقضا</th><th>روز مانده</th></tr></thead>
+          <tbody>
+            <% expiringContracts.forEach(function(c){ %>
+              <tr><td><%= c.first_name %> <%= c.last_name %></td><td>📄 <%= c.title %></td><td><%= U.jDate(c.end_date) %></td>
+              <td><span class="badge bg-warning text-dark"><%= U.faNum(U.daysBetween(today, c.end_date)) %> روز</span></td></tr>
+            <% }) %>
+            <% expiringDocs.forEach(function(d){ %>
+              <tr><td><%= d.first_name %> <%= d.last_name %></td><td>🗂 <%= d.title %></td><td><%= U.jDate(d.expiry_date) %></td>
+              <td><span class="badge bg-warning text-dark"><%= U.faNum(U.daysBetween(today, d.expiry_date)) %> روز</span></td></tr>
+            <% }) %>
+          </tbody>
+        </table></div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-cake2"></i> تولدهای پیش‌رو</div>
+      <div class="card-body p-0">
+        <% if (!birthdays.length) { %><div class="empty-state" style="padding:18px"><i class="bi bi-cake"></i>تولدی در ۳۰ روز آینده نیست.</div>
+        <% } else { %><ul class="list-group list-group-flush">
+          <% birthdays.forEach(function(b){ %>
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+              <span><%= b.first_name %> <%= b.last_name %></span>
+              <span class="badge bg-danger-subtle text-danger"><%= b.inDays === 0 ? 'امروز! 🎂' : U.faNum(b.inDays) + ' روز دیگر' %></span>
+            </li>
+          <% }) %>
+        </ul><% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-flag"></i> تعطیلات پیش‌رو</div>
+      <div class="card-body p-0">
+        <% if (!upcomingHolidays.length) { %><div class="empty-state" style="padding:18px"><i class="bi bi-calendar-x"></i>تعطیلی ثبت نشده است.</div>
+        <% } else { %><ul class="list-group list-group-flush">
+          <% upcomingHolidays.forEach(function(h){ %>
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+              <span><%= h.title %></span><small class="text-muted2"><%= U.jDate(h.date) %></small>
+            </li>
+          <% }) %>
+        </ul><% } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-megaphone"></i> آخرین اطلاعیه‌ها</div>
+      <div class="card-body p-0">
+        <% if (!announcements.length) { %><div class="empty-state" style="padding:18px"><i class="bi bi-megaphone"></i>اطلاعیه‌ای وجود ندارد.</div>
+        <% } else { %><ul class="list-group list-group-flush">
+          <% announcements.forEach(function(a){ %>
+            <li class="list-group-item bg-transparent">
+              <a href="/announcements/view/<%= a.id %>" class="fw-bold" style="font-size:13px"><%= a.pinned ? '📌 ' : '' %><%= a.title %></a>
+              <small class="text-muted2 d-block"><%= a.dept_name ? 'ویژه ' + a.dept_name : 'عمومی' %></small>
+            </li>
+          <% }) %>
+        </ul><% } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/vendor/chart.umd.min.js"></script>
+<script>
+(function () {
+  const grid = { color: getComputedStyle(document.documentElement).getPropertyValue('--border') || '#e6e8f0' };
+  const txt = getComputedStyle(document.documentElement).getPropertyValue('--text') || '#1e2438';
+  Chart.defaults.color = txt.trim();
+  Chart.defaults.font.family = 'Vazirmatn, Tahoma';
+  const hires = <%- JSON.stringify(charts.hires) %>;
+  new Chart(document.getElementById('chartHires'), {
+    type: 'bar',
+    data: { labels: hires.map(h => h.label), datasets: [{ label: 'استخدام', data: hires.map(h => h.count), backgroundColor: '#4f46e5', borderRadius: 6 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid, ticks: { precision: 0 } } } }
+  });
+  const dept = <%- JSON.stringify(charts.deptDist.filter(d=>d.c>0)) %>;
+  const palette = ['#4f46e5','#7c3aed','#0ea5e9','#16a34a','#eab308','#ef4444','#ec4899','#14b8a6','#f97316','#6366f1'];
+  new Chart(document.getElementById('chartDept'), {
+    type: 'doughnut',
+    data: { labels: dept.map(d => d.name), datasets: [{ data: dept.map(d => d.c), backgroundColor: dept.map((d, i) => palette[i % palette.length]), borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'left' } } }
+  });
+  const week = <%- JSON.stringify(charts.week) %>;
+  new Chart(document.getElementById('chartWeek'), {
+    type: 'line',
+    data: { labels: week.map(w => w.label), datasets: [
+      { label: 'حاضر', data: week.map(w => w.present), borderColor: '#16a34a', backgroundColor: 'rgba(22,163,74,.12)', fill: true, tension: .35 },
+      { label: 'غایب', data: week.map(w => w.absent), borderColor: '#ef4444', backgroundColor: 'rgba(239,68,68,.1)', fill: true, tension: .35 },
+      { label: 'مرخصی', data: week.map(w => w.leave), borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,.08)', fill: true, tension: .35 }
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, scales: { x: { grid: { display: false } }, y: { grid, ticks: { precision: 0 } } } }
+  });
+  const pt = <%- JSON.stringify(charts.payrollTrend) %>;
+  if (pt.length && document.getElementById('chartPayroll')) {
+    new Chart(document.getElementById('chartPayroll'), {
+      type: 'bar',
+      data: { labels: pt.map(p => { const j = p.month.split('-'); return j[1] + '/' + j[0].slice(2); }), datasets: [
+        { label: 'خالص پرداختی', data: pt.map(p => p.net), backgroundColor: '#4f46e5', borderRadius: 6 }
+      ] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid } } }
+    });
+  }
+})();
+</script>
+<%- include('partials/layout_bottom') %>

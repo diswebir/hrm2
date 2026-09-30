@@ -1,0 +1,64 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-calendar2-check"></i> درخواست‌های مرخصی<%= mine ? ' — درخواست‌های من' : '' %></h1>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary btn-sm" href="/leave/balances"><i class="bi bi-calculator me-1"></i> مانده‌ها</a>
+    <a class="btn btn-outline-secondary btn-sm" href="/leave/team-calendar"><i class="bi bi-calendar-week me-1"></i> تقویم تیمی</a>
+    <a class="btn btn-primary btn-sm" href="/leave/new"><i class="bi bi-plus-lg me-1"></i> درخواست مرخصی</a>
+  </div>
+</div>
+<%- include('../partials/flash') %>
+<div class="row g-3 mb-3">
+  <div class="col-4"><div class="kpi text-center py-3"><div class="k-val" style="color:#ca8a04"><%= U.faNum(stats.pending) %></div><div class="k-label">در انتظار</div></div></div>
+  <div class="col-4"><div class="kpi text-center py-3"><div class="k-val" style="color:#16a34a"><%= U.faNum(stats.approved) %></div><div class="k-label">تاییدشده</div></div></div>
+  <div class="col-4"><div class="kpi text-center py-3"><div class="k-val" style="color:#dc2626"><%= U.faNum(stats.rejected) %></div><div class="k-label">ردشده</div></div></div>
+</div>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="p-3 pb-0">
+      <form class="row g-2" method="get" action="/leave">
+        <% if (!mine) { %>
+        <div class="col-md-3"><select class="form-select form-select-sm" name="employee" onchange="this.form.submit()"><option value="">همه کارکنان</option>
+          <% emps.forEach(function(e){ %><option value="<%= e.id %>" <%= empId==String(e.id)?'selected':'' %>><%= e.first_name %> <%= e.last_name %></option><% }) %></select></div>
+        <% } else { %><input type="hidden" name="mine" value="1"><% } %>
+        <div class="col-md-3"><select class="form-select form-select-sm" name="status" onchange="this.form.submit()">
+          <option value="">همه وضعیت‌ها</option>
+          <% [['pending','در انتظار'],['approved','تایید شده'],['rejected','رد شده'],['cancelled','لغو']].forEach(function(o){ %>
+            <option value="<%= o[0] %>" <%= status===o[0]?'selected':'' %>><%= o[1] %></option><% }) %></select></div>
+      </form>
+    </div>
+    <div class="table-wrap p-3">
+      <table class="table table-hover align-middle" data-sortable>
+        <thead><tr><th>کارمند</th><th>نوع</th><th>از</th><th>تا</th><th>روز</th><th>دلیل</th><th>وضعیت</th><th></th></tr></thead>
+        <tbody>
+          <% if (!rows.length) { %><tr><td colspan="8" class="text-center text-muted2 py-4">درخواستی وجود ندارد.</td></tr><% } %>
+          <% rows.forEach(function(l){ %>
+            <tr>
+              <td><b><%= l.first_name %> <%= l.last_name %></b><br><small class="text-muted2"><%= U.faNum(l.code) %></small></td>
+              <td><span class="badge" style="background:<%= l.color %>"><%= l.type_name %></span></td>
+              <td style="font-size:12.5px"><%= U.jDate(l.from_date) %></td>
+              <td style="font-size:12.5px"><%= U.jDate(l.to_date) %></td>
+              <td><%= U.faNum(l.days) %></td>
+              <td style="font-size:12.5px;max-width:180px"><%= l.reason || '—' %>
+                <% if (l.attachment) { %><a href="/files/leave/<%= l.id %>" class="d-block" style="font-size:11px"><i class="bi bi-paperclip"></i> پیوست</a><% } %></td>
+              <td><span class="badge bg-<%= HH.badgeClass(l.status) %>"><%= U.label(l.status) %></span>
+                <% if (l.decision_note) { %><small class="d-block text-muted2" style="font-size:11px"><%= l.decision_note %></small><% } %></td>
+              <td class="text-nowrap">
+                <% if (l.status === 'pending' && !mine) { %><a class="btn btn-sm btn-outline-primary" href="/leave/approvals">تایید</a><% } %>
+                <% if (l.status === 'pending' || l.status === 'approved') { %>
+                  <form class="d-inline" method="post" action="/leave/<%= l.id %>/cancel" data-confirm="لغو شود؟">
+                    <input type="hidden" name="_csrf" value="<%= csrf %>">
+                    <button class="btn btn-sm btn-outline-danger btn-icon" title="لغو"><i class="bi bi-x-lg"></i></button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

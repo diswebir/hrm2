@@ -1,0 +1,35 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title"><h1><i class="bi bi-receipt"></i> <%= title %></h1></div>
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <form method="post" action="/expenses/new" enctype="multipart/form-data">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <div class="row g-3">
+            <div class="col-md-8"><label class="form-label req">عنوان</label>
+              <input class="form-control" name="title" value="<%= old ? old.title : '' %>" placeholder="مثلاً هزینه سفر کاری شیراز" required></div>
+            <div class="col-md-4"><label class="form-label">دسته</label>
+              <select class="form-select" name="category">
+                <% Object.entries(categories).forEach(function(kv){ %><option value="<%= kv[0] %>"><%= kv[1] %></option><% }) %></select></div>
+            <div class="col-md-6"><label class="form-label req">مبلغ</label>
+              <input class="form-control" name="amount" value="<%= old ? old.amount : '' %>" required placeholder="مثلاً ۲٬۵۰۰٬۰۰۰"></div>
+            <div class="col-md-6"><label class="form-label req">تاریخ</label>
+              <input type="text" class="form-control jdate" name="date" value="<%= old && old.date ? old.date : U.jDateEn(today) %>"></div>
+            <div class="col-12"><label class="form-label">توضیحات</label>
+              <textarea class="form-control" name="description" rows="2"><%= old ? old.description : '' %></textarea></div>
+            <div class="col-12"><label class="form-label">تصویر رسید / فاکتور</label>
+              <input type="file" class="form-control" name="receipt" accept="image/*,.pdf">
+              <div class="form-text">در صورت پیوست، تاییدکننده می‌تواند رسید را ببیند.</div></div>
+          </div>
+          <div class="d-flex gap-2 mt-4 pt-3 border-top">
+            <button class="btn btn-primary px-4" style="font-weight:700">ثبت درخواست</button>
+            <a class="btn btn-outline-secondary" href="/expenses">انصراف</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

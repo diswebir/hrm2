@@ -1,0 +1,39 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-list-columns-reverse"></i> لاگ فعالیت‌ها</h1>
+    <div class="subtitle"><%= U.faNum(total) %> رویداد ثبت‌شده</div>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="/activity?q=<%= encodeURIComponent(q) %>&action=<%= action %>&csv=1"><i class="bi bi-download me-1"></i> خروجی CSV</a>
+</div>
+<div class="card mb-3"><div class="card-body">
+  <form class="row g-2" method="get" action="/activity">
+    <div class="col-md-4"><input class="form-control form-control-sm" name="q" placeholder="جستجو: کاربر، جزئیات..." value="<%= q %>"></div>
+    <div class="col-md-3"><select class="form-select form-select-sm" name="action">
+      <option value="">همه عملیات</option>
+      <% actions.forEach(function(a){ %><option value="<%= a %>" <%= action===a?'selected':'' %>><%= a %></option><% }) %>
+    </select></div>
+    <div class="col-md-2"><button class="btn btn-sm btn-outline-secondary w-100">فیلتر</button></div>
+  </form>
+</div></div>
+<div class="card">
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle">
+      <thead><tr><th>زمان</th><th>کاربر</th><th>عملیات</th><th>موجودیت</th><th>جزئیات</th><th>IP</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function(l){ %>
+          <tr>
+            <td style="font-size:12px;white-space:nowrap"><%= (l.created_at || '').slice(0,16).replace('T',' ') %></td>
+            <td><b dir="ltr" style="text-align:right"><%= l.username || 'سیستم' %></b></td>
+            <td><span class="badge bg-<%= l.action.indexOf('delete')===0?'danger':(l.action.indexOf('create')===0||l.action.indexOf('approve')===0?'success':(l.action.indexOf('update')===0?'primary':'secondary')) %>"><%= l.action %></span></td>
+            <td style="font-size:12.5px"><%= l.entity %><%= l.entity_id ? ' #' + U.faNum(l.entity_id) : '' %></td>
+            <td style="font-size:12.5px"><%= l.details || '—' %></td>
+            <td style="font-size:11.5px" dir="ltr"><%= l.ip %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+<%- include('../partials/pagination', {q:{q,action}, total}) %>
+<%- include('../partials/layout_bottom') %>

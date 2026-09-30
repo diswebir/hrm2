@@ -1,0 +1,62 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-journal-text"></i> گزارش حضور و غیاب</h1>
+    <div class="subtitle"><%= U.jDate(from) %> تا <%= U.jDate(to) %></div>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="/attendance/report?from=<%= encodeURIComponent(U.jDateEn(from)) %>&to=<%= encodeURIComponent(U.jDateEn(to)) %>&employee=<%= empId %>&dept=<%= dept %>&status=<%= status %>&csv=1"><i class="bi bi-download me-1"></i> خروجی CSV</a>
+</div>
+<div class="card mb-3">
+  <div class="card-body">
+    <form class="row g-2" method="get" action="/attendance/report">
+      <div class="col-md-2"><label class="form-label">از تاریخ</label><input type="text" class="form-control form-control-sm jdate" name="from" value="<%= U.jDateEn(from) %>"></div>
+      <div class="col-md-2"><label class="form-label">تا تاریخ</label><input type="text" class="form-control form-control-sm jdate" name="to" value="<%= U.jDateEn(to) %>"></div>
+      <div class="col-md-3"><label class="form-label">کارمند</label>
+        <select class="form-select form-select-sm" name="employee"><option value="">همه</option>
+          <% emps.forEach(function(e){ %><option value="<%= e.id %>" <%= empId==String(e.id)?'selected':'' %>><%= e.first_name %> <%= e.last_name %></option><% }) %></select></div>
+      <div class="col-md-2"><label class="form-label">واحد</label>
+        <select class="form-select form-select-sm" name="dept"><option value="">همه</option>
+          <% depts.forEach(function(d){ %><option value="<%= d.id %>" <%= dept==String(d.id)?'selected':'' %>><%= d.name %></option><% }) %></select></div>
+      <div class="col-md-2"><label class="form-label">وضعیت</label>
+        <select class="form-select form-select-sm" name="status"><option value="">همه</option>
+          <% [['present','حاضر'],['absent','غایب'],['leave','مرخصی'],['mission','مأموریت']].forEach(function(o){ %><option value="<%= o[0] %>" <%= status===o[0]?'selected':'' %>><%= o[1] %></option><% }) %></select></div>
+      <div class="col-md-1 d-flex align-items-end"><button class="btn btn-sm btn-primary w-100">اعمال</button></div>
+    </form>
+  </div>
+</div>
+<% if (summary) { %>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-2"><div class="kpi text-center py-3"><div class="k-val att-p"><%= U.faNum(summary.present || 0) %></div><div class="k-label">حاضر</div></div></div>
+  <div class="col-6 col-md-2"><div class="kpi text-center py-3"><div class="k-val att-a"><%= U.faNum(summary.absent || 0) %></div><div class="k-label">غایب</div></div></div>
+  <div class="col-6 col-md-2"><div class="kpi text-center py-3"><div class="k-val att-l"><%= U.faNum(summary.leaves || 0) %></div><div class="k-label">مرخصی</div></div></div>
+  <div class="col-6 col-md-2"><div class="kpi text-center py-3"><div class="k-val" style="color:#ca8a04"><%= U.faNum(summary.late || 0) %></div><div class="k-label">جمع تأخیر (دقیقه)</div></div></div>
+  <div class="col-6 col-md-2"><div class="kpi text-center py-3"><div class="k-val" style="color:#7c3aed"><%= U.faNum(Math.round((summary.ot || 0)/60)) %></div><div class="k-label">اضافه‌کاری (ساعت)</div></div></div>
+  <div class="col-6 col-md-2"><div class="kpi text-center py-3"><div class="k-val"><%= U.faNum(Math.round((summary.worked || 0)/60)) %></div><div class="k-label">کارکرد (ساعت)</div></div></div>
+</div>
+<% } %>
+<div class="card">
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle" data-sortable>
+      <thead><tr><th>تاریخ</th><th>کارمند</th><th>واحد</th><th>ورود</th><th>خروج</th><th>تأخیر</th><th>تعجیل</th><th>کارکرد</th><th>اضافه‌کاری</th><th>وضعیت</th><th>منبع</th></tr></thead>
+      <tbody>
+        <% if (!rows.length) { %><tr><td colspan="11" class="text-center text-muted2 py-4">رکوردی در این بازه یافت نشد.</td></tr><% } %>
+        <% rows.forEach(function(r){ %>
+          <tr>
+            <td><%= U.jDate(r.date) %></td>
+            <td><b><%= r.first_name %> <%= r.last_name %></b></td>
+            <td><%= r.dept_name || '—' %></td>
+            <td><%= r.check_in ? U.faNum(r.check_in) : '—' %></td>
+            <td><%= r.check_out ? U.faNum(r.check_out) : '—' %></td>
+            <td><%= r.late_minutes ? U.faNum(r.late_minutes) + ' د' : '—' %></td>
+            <td><%= r.early_minutes ? U.faNum(r.early_minutes) + ' د' : '—' %></td>
+            <td><%= r.worked_minutes ? U.faNum(Math.round(r.worked_minutes/60*10)/10) + ' س' : '—' %></td>
+            <td><%= r.overtime_minutes ? U.faNum(Math.round(r.overtime_minutes/60*10)/10) + ' س' : '—' %></td>
+            <td><span class="badge bg-<%= r.status==='present'?'success':(r.status==='absent'?'danger':(r.status==='leave'?'info':'secondary')) %>"><%= U.label(r.status) %></span></td>
+            <td><small class="text-muted2"><%= r.source === 'self' ? 'کارمند' : (r.source === 'manual' ? 'دستی' : (r.source === 'auto-leave' ? 'خودکار' : r.source)) %></small></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+<%- include('../partials/layout_bottom') %>

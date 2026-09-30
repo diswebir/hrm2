@@ -1,0 +1,60 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi <%= icon %>"></i> <%= title %></h1>
+    <% if (subtitle) { %><div class="subtitle"><%= subtitle %></div><% } %>
+  </div>
+  <div class="d-flex gap-2">
+    <% if (canExport && rows.length) { %>
+      <a class="btn btn-outline-secondary btn-sm" href="<%= base %>/export<%= q && q.q ? '?q=' + encodeURIComponent(q.q) : '' %>"><i class="bi bi-download me-1"></i> خروجی CSV</a>
+    <% } %>
+    <% if (canCreate) { %>
+      <a class="btn btn-primary btn-sm" href="<%= base %>/new"><i class="bi bi-plus-lg me-1"></i> ثبت <%= singular %> جدید</a>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/flash') %>
+<div class="card">
+  <div class="card-body p-0">
+    <div class="p-3 pb-0">
+      <form class="row g-2" method="get" action="<%= base %>">
+        <div class="col-md-5">
+          <div class="input-group input-group-sm">
+            <input type="text" class="form-control" name="q" placeholder="جستجو..." value="<%= q || '' %>">
+            <button class="btn btn-outline-secondary" type="submit"><i class="bi bi-search"></i></button>
+          </div>
+        </div>
+      </form>
+    </div>
+    <% if (!rows.length) { %>
+      <div class="empty-state"><i class="bi bi-inbox"></i>هنوز موردی ثبت نشده است.</div>
+    <% } else { %>
+      <div class="table-wrap p-3">
+        <table class="table table-hover align-middle" data-sortable>
+          <thead>
+            <tr>
+              <% listFields.forEach(function(f){ %><th><%= f.label %></th><% }) %>
+              <th style="width:110px">عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% rows.forEach(function(row){ %>
+              <tr>
+                <% listFields.forEach(function(f){ %><td><%- cell(f, row) %></td><% }) %>
+                <td class="text-nowrap">
+                  <a class="btn btn-sm btn-outline-primary btn-icon" href="<%= base %>/<%= row.id %>/edit" title="ویرایش"><i class="bi bi-pencil"></i></a>
+                  <form class="d-inline" method="post" action="<%= base %>/<%= row.id %>/delete" data-confirm="این رکورد حذف شود؟">
+                    <input type="hidden" name="_csrf" value="<%= csrf %>">
+                    <button class="btn btn-sm btn-outline-danger btn-icon" title="حذف"><i class="bi bi-trash"></i></button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class="px-3"><%- include('../partials/pagination', {q: {q: q}, total: total}) %></div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

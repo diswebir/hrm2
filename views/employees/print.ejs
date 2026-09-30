@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>پرونده پرسنلی — <%= e.first_name %> <%= e.last_name %></title>
+  <link rel="stylesheet" href="/vendor/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="/vendor/fonts-vazirmatn/vazirmatn.css">
+  <style>
+    body{font-family:'Vazirmatn',Tahoma;font-size:13px;background:#fff}
+    .doc{max-width:800px;margin:20px auto;padding:26px;border:1px solid #ddd;border-radius:8px}
+    .doc h2{text-align:center;font-size:18px;font-weight:800;border-bottom:2px solid #333;padding-bottom:8px}
+    .sec{font-weight:800;font-size:14px;margin:18px 0 6px;color:#312e81;border-right:4px solid #4f46e5;padding-right:8px}
+    table{width:100%;border-collapse:collapse}
+    td,th{border:1px solid #ccc;padding:5px 8px}
+    th{background:#f1f2f8;font-size:12px}
+    @media print{.noprint{display:none}.doc{border:none;margin:0}}
+  </style>
+</head>
+<body>
+<div class="doc">
+  <h2><%= s.company_name %> — پرونده پرسنلی</h2>
+  <table>
+    <tr><th>نام و نام خانوادگی</th><td><%= e.first_name %> <%= e.last_name %></td><th>شماره پرسنلی</th><td><%= e.code %></td></tr>
+    <tr><th>سمت</th><td><%= e.desig_name || '—' %></td><th>دپارتمان</th><td><%= e.dept_name || '—' %></td></tr>
+    <tr><th>کد ملی</th><td><%= e.national_id || '—' %></td><th>تاریخ تولد</th><td><%= U.jDate(e.birth_date) %></td></tr>
+    <tr><th>تلفن</th><td><%= e.phone || '—' %></td><th>تاریخ استخدام</th><td><%= U.jDate(e.hire_date) %></td></tr>
+    <tr><th>نوع همکاری</th><td><%= U.label(e.contract_type) %></td><th>حقوق پایه</th><td><%= U.money(e.base_salary, currency) %></td></tr>
+  </table>
+
+  <div class="sec">سوابق تحصیلی</div>
+  <table><tr><th>مقطع</th><th>رشته</th><th>دانشگاه</th><th>سال</th><th>معدل</th></tr>
+    <% if (!education.length) { %><tr><td colspan="5" style="text-align:center">—</td></tr><% } %>
+    <% education.forEach(function(x){ %><tr><td><%= x.degree %></td><td><%= x.field %></td><td><%= x.institute %></td><td><%= x.year %></td><td><%= x.gpa %></td></tr><% }) %>
+  </table>
+
+  <div class="sec">مهارت‌ها</div>
+  <table><tr><th>مهارت</th><th>سطح (از ۵)</th></tr>
+    <% if (!skills.length) { %><tr><td colspan="2" style="text-align:center">—</td></tr><% } %>
+    <% skills.forEach(function(x){ %><tr><td><%= x.skill %></td><td><%= x.level %></td></tr><% }) %>
+  </table>
+
+  <div class="sec">تماس اضطراری / خانواده</div>
+  <table><tr><th>نام</th><th>نسبت</th><th>تلفن</th><th>اضطراری</th></tr>
+    <% if (!contacts.length) { %><tr><td colspan="4" style="text-align:center">—</td></tr><% } %>
+    <% contacts.forEach(function(x){ %><tr><td><%= x.name %></td><td><%= x.relation %></td><td><%= x.phone %></td><td><%= x.is_emergency ? 'بله' : 'خیر' %></td></tr><% }) %>
+  </table>
+
+  <div class="sec">قراردادها</div>
+  <table><tr><th>عنوان</th><th>نوع</th><th>شروع</th><th>پایان</th><th>مبلغ</th></tr>
+    <% if (!contracts.length) { %><tr><td colspan="5" style="text-align:center">—</td></tr><% } %>
+    <% contracts.forEach(function(c){ %><tr><td><%= c.title %></td><td><%= U.label(c.type) %></td><td><%= U.jDate(c.start_date) %></td><td><%= U.jDate(c.end_date) %></td><td><%= U.money(c.salary, currency) %></td></tr><% }) %>
+  </table>
+
+  <div class="sec">سوابق شغلی</div>
+  <table><tr><th>عنوان</th><th>از</th><th>تا</th><th>حقوق</th></tr>
+    <% if (!history.length) { %><tr><td colspan="4" style="text-align:center">—</td></tr><% } %>
+    <% history.forEach(function(h){ %><tr><td><%= h.title %></td><td><%= U.jDate(h.from_date) %></td><td><%= h.to_date ? U.jDate(h.to_date) : 'تاکنون' %></td><td><%= U.money(h.salary, currency) %></td></tr><% }) %>
+  </table>
+
+  <div class="d-flex justify-content-between mt-4" style="font-size:12px">
+    <span>تاریخ چاپ: <%= U.jDate(U.todayIso(210)) %></span>
+    <span>امضای مسئول منابع انسانی: ..................</span>
+  </div>
+</div>
+<div class="text-center noprint mt-3">
+  <button class="btn btn-primary" onclick="window.print()">چاپ</button>
+  <a class="btn btn-outline-secondary" href="/employees/<%= e.id %>">بازگشت</a>
+</div>
+</body>
+</html>

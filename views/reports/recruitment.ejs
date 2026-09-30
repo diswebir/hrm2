@@ -1,0 +1,37 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-person-plus"></i> گزارش جذب و استخدام</h1>
+    <div class="subtitle">قیف جذب — تعداد کاندیدا در هر مرحله</div>
+  </div>
+</div>
+<div class="row g-3 mb-3">
+  <% byStage.forEach(function(s){ %>
+    <div class="col-6 col-md-4 col-xl-2">
+      <div class="kpi text-center py-3">
+        <div class="k-val"><%= U.faNum(s.c) %></div>
+        <div class="k-label"><%= U.label(s.stage) %></div>
+      </div>
+    </div>
+  <% }) %>
+</div>
+<div class="card">
+  <div class="card-header"><i class="bi bi-megaphone"></i> عملکرد هر آگهی</div>
+  <div class="card-body p-0"><div class="table-wrap p-3">
+    <table class="table table-hover align-middle" data-sortable>
+      <thead><tr><th>آگهی</th><th>کاندیدا</th><th>استخدام‌شده</th><th style="width:35%">نرخ تبدیل</th></tr></thead>
+      <tbody>
+        <% byPosting.forEach(function(p){ const rate = p.c ? Math.round(p.hired / p.c * 100) : 0; %>
+          <tr>
+            <td><b><%= p.title %></b></td>
+            <td><%= U.faNum(p.c) %></td>
+            <td><%= U.faNum(p.hired || 0) %></td>
+            <td><div class="progress" style="height:8px"><div class="progress-bar bg-success" style="width:<%= rate %>%"></div></div>
+              <small><%= U.faNum(rate) %>٪</small></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div></div>
+</div>
+<%- include('../partials/layout_bottom') %>

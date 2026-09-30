@@ -1,0 +1,27 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-cake2"></i> تولدها و مناسبت‌ها</h1>
+    <div class="subtitle">۴۵ روز آینده — بر اساس تاریخ تولد شمسی</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-body p-0">
+    <% if (!rows.length) { %><div class="empty-state"><i class="bi bi-cake"></i>تولدی در ۴۵ روز آینده نیست.</div>
+    <% } else { %><div class="table-wrap p-3"><table class="table table-hover align-middle" data-sortable>
+      <thead><tr><th>کارمند</th><th>واحد</th><th>تولد (شمسی)</th><th>چند روز مانده</th><th>تلفن</th></tr></thead>
+      <tbody>
+        <% rows.forEach(function(b){ %>
+          <tr>
+            <td><b><%= b.first_name %> <%= b.last_name %></b></td>
+            <td><%= b.dept_name || '—' %></td>
+            <td><%= U.faNum(b.jd) %> <%= U.FA_MONTHS[b.jm - 1] %></td>
+            <td><span class="badge <%= b.inDays===0 ? 'bg-danger' : (b.inDays<=7 ? 'bg-warning text-dark' : 'bg-secondary') %>"><%= b.inDays === 0 ? 'امروز! 🎂' : U.faNum(b.inDays) + ' روز' %></span></td>
+            <td dir="ltr" style="text-align:right"><%= b.phone ? U.faNum(b.phone) : '—' %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table></div><% } %>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

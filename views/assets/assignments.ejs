@@ -1,0 +1,70 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-arrow-left-right"></i> تحویل اموال</h1>
+    <div class="subtitle">تحویل دارایی به کارمند و ثبت بازگشت</div>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="/assets"><i class="bi bi-box-seam me-1"></i> لیست دارایی‌ها</a>
+</div>
+<% if (error) { %><div class="alert alert-warning"><%= error %></div><% } %>
+<div class="row g-3 mb-3">
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-box-arrow-in-up-right"></i> تحویل جدید</div>
+      <div class="card-body">
+        <% if (!available.length || !emps.length) { %><div class="alert alert-info mb-0">دارایی آزاد یا کارمند فعالی موجود نیست.</div>
+        <% } else { %>
+        <form method="post" action="/asset-assignments">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <div class="mb-2"><label class="form-label req">دارایی (آزاد)</label>
+            <select class="form-select form-select-sm" name="asset_id" required>
+              <option value="">— انتخاب کنید —</option>
+              <% available.forEach(function(a){ %><option value="<%= a.id %>"><%= a.name %> (<%= a.code %>)</option><% }) %></select></div>
+          <div class="mb-2"><label class="form-label req">تحویل به</label>
+            <select class="form-select form-select-sm" name="employee_id" required>
+              <option value="">— انتخاب کنید —</option>
+              <% emps.forEach(function(e){ %><option value="<%= e.id %>"><%= e.first_name %> <%= e.last_name %></option><% }) %></select></div>
+          <div class="row g-2 mb-2">
+            <div class="col-6"><label class="form-label">تاریخ تحویل</label><input type="text" class="form-control form-control-sm jdate" name="assigned_date"></div>
+            <div class="col-6"><label class="form-label">مهلت بازگشت</label><input type="text" class="form-control form-control-sm jdate" name="due_date"></div>
+          </div>
+          <div class="mb-2"><label class="form-label">شرح وضعیت هنگام تحویل</label><input class="form-control form-control-sm" name="condition_out" placeholder="مثلاً سالم همراه با شارژر"></div>
+          <button class="btn btn-primary w-100">ثبت تحویل</button>
+        </form>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-list-check"></i> رکوردهای تحویل</div>
+      <div class="card-body p-0">
+        <% if (!rows.length) { %><div class="empty-state" style="padding:20px">رکوردی ثبت نشده است.</div>
+        <% } else { %><div class="table-wrap p-3"><table class="table align-middle">
+          <thead><tr><th>دارایی</th><th>کارمند</th><th>تحویل</th><th>بازگشت</th><th>وضعیت</th><th></th></tr></thead>
+          <tbody>
+            <% rows.forEach(function(a){ %>
+              <tr>
+                <td><b><%= a.asset_name %></b><br><small class="text-muted2" dir="ltr"><%= a.asset_code %></small></td>
+                <td><%= a.first_name %> <%= a.last_name %></td>
+                <td style="font-size:12px"><%= U.jDate(a.assigned_date) %><% if (a.condition_out) { %><br><small class="text-muted2"><%= a.condition_out %></small><% } %></td>
+                <td style="font-size:12px"><%= a.returned_date ? U.jDate(a.returned_date) : '—' %><% if (a.condition_in) { %><br><small class="text-muted2"><%= a.condition_in %></small><% } %></td>
+                <td><span class="badge bg-<%= a.status==='active'?'warning text-dark':'success' %>"><%= a.status==='active'?'تحویل‌شده':'بازگشته' %></span></td>
+                <td>
+                  <% if (a.status === 'active') { %>
+                    <form class="d-flex gap-1" method="post" action="/asset-assignments/<%= a.id %>/return">
+                      <input type="hidden" name="_csrf" value="<%= csrf %>">
+                      <input type="text" class="form-control form-control-sm" name="condition_in" placeholder="وضعیت برگشت">
+                      <button class="btn btn-sm btn-outline-primary text-nowrap">ثبت بازگشت</button>
+                    </form>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table></div><% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

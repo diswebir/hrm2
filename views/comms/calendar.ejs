@@ -1,0 +1,41 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-calendar-event"></i> تقویم رویدادها</h1>
+    <div class="subtitle"><%= monthName %> <%= U.faNum(jy) %> — 🎂 تولدها بر اساس تاریخ تولد شمسی</div>
+  </div>
+  <div class="d-flex gap-2">
+    <form class="d-flex gap-2" method="get" action="/events/calendar">
+      <select class="form-select form-select-sm" name="jm">
+        <% U.FA_MONTHS.forEach(function(m, i){ %><option value="<%= i+1 %>" <%= jm===i+1?'selected':'' %>><%= m %></option><% }) %>
+      </select>
+      <input type="number" class="form-control form-control-sm" name="jy" value="<%= jy %>" style="max-width:100px">
+      <button class="btn btn-sm btn-primary">نمایش</button>
+    </form>
+    <a class="btn btn-outline-secondary btn-sm" href="/events"><i class="bi bi-gear me-1"></i> مدیریت رویدادها</a>
+  </div>
+</div>
+<div class="card p-3">
+  <div class="cal-grid">
+    <% ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'].forEach(function(d){ %><div class="cal-dow"><%= d %></div><% }) %>
+    <%
+      if (days.length) {
+        const g0 = U.toGregorian(days[0].jd.jy, days[0].jd.jm, 1);
+        const firstDow = (new Date(Date.UTC(g0.gy, g0.gm - 1, g0.gd)).getUTCDay() + 1) % 7;
+        for (let x = 0; x < firstDow; x++) { %><div class="cal-cell empty"></div><% }
+      }
+    %>
+    <% days.forEach(function(d){ %>
+      <div class="cal-cell <%= d.weekend ? 'weekend' : '' %> <%= d.holiday ? 'holiday' : '' %>">
+        <div class="cal-day-num"><%= U.faNum(d.jd.jd) %></div>
+        <% d.births.forEach(function(b){ %>
+          <div class="cal-leave" style="background:#ec4899" title="تولد <%= b.first_name %> <%= b.last_name %>">🎂 <%= b.first_name %> <%= b.last_name %></div>
+        <% }) %>
+        <% d.events.forEach(function(ev){ %>
+          <div class="cal-ev" title="<%= ev.title %>"><i class="bi bi-<%= ev.type==='meeting'?'people':'star' %>"></i> <%= ev.title %><%= ev.time ? ' ' + ev.time : '' %></div>
+        <% }) %>
+      </div>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

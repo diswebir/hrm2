@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>نصب سامانه | منابع انسانی</title>
+  <link rel="stylesheet" href="/vendor/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons.css">
+  <link rel="stylesheet" href="/vendor/fonts-vazirmatn/vazirmatn.css">
+  <style>
+    body{font-family:'Vazirmatn',Tahoma;font-size:14px;background:#f4f5fb}
+    .wrap{max-width:760px;margin:40px auto;padding:0 16px}
+    .logo{width:70px;height:70px;border-radius:20px;background:linear-gradient(135deg,#4f46e5,#6d28d9);display:flex;align-items:center;justify-content:center;color:#fff;font-size:32px;margin:0 auto 14px}
+    .step-badge{width:30px;height:30px;border-radius:50%;background:#4f46e5;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="text-center mb-4">
+    <div class="logo"><i class="bi bi-people-fill"></i></div>
+    <h1 class="h4 fw-bold mb-1">نصب سامانه جامع منابع انسانی</h1>
+    <p class="text-muted" style="font-size:13px">سه مرحله ساده تا راه‌اندازی کامل — دیتابیس به‌صورت خودکار ساخته می‌شود.</p>
+  </div>
+
+  <% if (error) { %><div class="alert alert-danger"><i class="bi bi-exclamation-triangle me-1"></i> <%= error %></div><% } %>
+
+  <div class="card border-0 shadow-sm mb-3">
+    <div class="card-body">
+      <div class="d-flex align-items-center gap-2 mb-2"><span class="step-badge">۱</span><b>بررسی پیش‌نیازها</b></div>
+      <% let allOk = true; checks.forEach(function(c){ if(!c.ok) allOk = false; %>
+        <div class="install-step">
+          <i class="bi <%= c.ok ? 'bi-check-circle-fill check-ok' : 'bi-x-circle-fill check-bad' %>"></i>
+          <div>
+            <div class="fw-bold" style="font-size:13.5px"><%= c.label %> <%= c.ok ? '— تایید ✓' : '' %></div>
+            <% if (!c.ok) { %><small class="text-muted">راهکار: <%= c.fix %></small><% } %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex align-items-center gap-2 mb-3"><span class="step-badge">۲</span><b>اطلاعات شرکت و حساب مدیر</b></div>
+      <form method="post" action="/install">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label req">نام شرکت / سازمان</label>
+            <input type="text" class="form-control" name="company_name" value="شرکت من" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">نام نمایشی سامانه</label>
+            <input type="text" class="form-control" name="system_name" value="سامانه جامع منابع انسانی">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label req">نام کاربری مدیر (انگلیسی)</label>
+            <input type="text" class="form-control" name="admin_username" value="admin" pattern="[a-zA-Z0-9_.@-]{3,40}" required dir="ltr">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">ایمیل مدیر (اختیاری)</label>
+            <input type="email" class="form-control" name="admin_email" dir="ltr">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label req">رمز عبور مدیر</label>
+            <input type="password" class="form-control" name="admin_pass" minlength="6" required dir="ltr">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label req">تکرار رمز عبور</label>
+            <input type="password" class="form-control" name="admin_pass2" minlength="6" required dir="ltr">
+          </div>
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="demo" value="1" id="demoChk">
+              <label class="form-check-label" for="demoChk" style="font-size:13.5px">
+                ایجاد <b>داده‌های نمونه</b> (کارکنان، حضور و غیاب، مرخصی، حقوق و...) برای آشنایی سریع با سامانه
+              </label>
+            </div>
+          </div>
+          <div class="col-12 text-start border-top pt-3">
+            <button class="btn btn-primary px-5" style="font-weight:700" <%= allOk ? '' : 'disabled' %>>
+              <i class="bi bi-rocket-takeoff me-1"></i> اجرای نصب (مرحله ۳)
+            </button>
+            <% if (!allOk) { %><small class="text-danger d-block mt-2">ابتدا موارد بررسی بالا را برطرف کنید.</small><% } %>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <p class="text-center text-muted mt-3" style="font-size:12px">راهنمای کامل نصب روی cPanel در فایل README.md پروژه موجود است.</p>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-receipt"></i> گزارش هزینه‌ها</h1>
+    <div class="subtitle">تایید و پرداخت‌شده — جمع کل: <%= U.money(total, currency) %></div>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-tags"></i> به‌تفکیک دسته</div>
+      <div class="card-body p-0">
+        <% if (!byCategory.length) { %><div class="empty-state" style="padding:18px">هزینه‌ای ثبت نشده.</div>
+        <% } else { %><ul class="list-group list-group-flush">
+          <% byCategory.forEach(function(c){ %>
+            <li class="list-group-item bg-transparent">
+              <div class="d-flex justify-content-between mb-1"><span><%= c.label %></span><b><%= U.moneyPlain(c.total) %></b></div>
+              <div class="progress" style="height:7px"><div class="progress-bar" style="width:<%= total ? Math.round(c.total/total*100) : 0 %>%"></div></div>
+            </li>
+          <% }) %>
+        </ul><% } %>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-people"></i> بیشترین هزینه به‌تفکیک کارمند</div>
+      <div class="card-body p-0">
+        <% if (!byEmp.length) { %><div class="empty-state" style="padding:18px">داده‌ای نیست.</div>
+        <% } else { %><table class="table align-middle">
+          <thead><tr><th>کارمند</th><th>جمع هزینه</th></tr></thead>
+          <tbody>
+            <% byEmp.forEach(function(x){ %>
+              <tr><td><%= x.first_name %> <%= x.last_name %></td><td><b><%= U.moneyPlain(x.total) %></b></td></tr>
+            <% }) %>
+          </tbody></table><% } %>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

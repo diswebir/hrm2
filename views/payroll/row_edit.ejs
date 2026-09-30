@@ -1,0 +1,70 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-pencil"></i> ویرایش ردیف حقوق — <%= row.first_name %> <%= row.last_name %> (<%= row.month.replace('-', '/') %>)</h1>
+  </div>
+  <a class="btn btn-outline-secondary btn-sm" href="/payroll/<%= row.month %>">بازگشت به لیست</a>
+</div>
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-calculator"></i> مبالغ</div>
+      <div class="card-body">
+        <form method="post" action="/payroll/row/<%= row.id %>/edit">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <div class="row g-3">
+            <div class="col-md-6"><label class="form-label">حقوق پایه پرداختی (بعد از کسر غیبت)</label>
+              <input class="form-control" name="base_pay" value="<%= U.faNum(Number(row.base).toLocaleString('en-US')) %>"></div>
+            <div class="col-md-6"><label class="form-label">مبلغ اضافه‌کاری</label>
+              <input class="form-control" name="overtime_amount" value="<%= U.faNum(Number(row.overtime_amount).toLocaleString('en-US')) %>"></div>
+            <div class="col-md-6"><label class="form-label">جمع مزایا</label>
+              <input class="form-control" name="allowances" value="<%= U.faNum(Number(row.allowances).toLocaleString('en-US')) %>"></div>
+            <div class="col-md-6"><label class="form-label">جمع کسورات</label>
+              <input class="form-control" name="deductions" value="<%= U.faNum(Number(row.deductions).toLocaleString('en-US')) %>"></div>
+            <div class="col-md-6"><label class="form-label">بیمه</label>
+              <input class="form-control" name="insurance" value="<%= U.faNum(Number(row.insurance).toLocaleString('en-US')) %>"></div>
+            <div class="col-md-6"><label class="form-label">مالیات</label>
+              <input class="form-control" name="tax" value="<%= U.faNum(Number(row.tax).toLocaleString('en-US')) %>"></div>
+            <div class="col-12"><label class="form-label">یادداشت</label>
+              <input class="form-control" name="note" value="<%= row.note || '' %>"></div>
+          </div>
+          <button class="btn btn-primary mt-3"><i class="bi bi-check-lg me-1"></i> ذخیره و محاسبه مجدد خالص</button>
+          <div class="form-text mt-2">خالص پرداختی = پایه + اضافه‌کاری + مزایا − کسورات − بیمه − مالیات (و قسط وام هنگام نهایی‌سازی)</div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-header"><i class="bi bi-plus-slash-minus"></i> آیتم‌های مزایا / کسورات</div>
+      <div class="card-body p-0">
+        <% if (!items.length) { %><div class="empty-state" style="padding:16px">آیتمی ثبت نشده (بن، پاداش، کسور موردی...).</div><% } else { %>
+        <ul class="list-group list-group-flush">
+          <% items.forEach(function(it){ %>
+            <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+              <span><span class="badge bg-<%= it.kind==='allowance'?'success':'danger' %>"><%= it.kind==='allowance' ? 'مزایا' : 'کسور' %></span> <%= it.label %></span>
+              <span class="d-flex align-items-center gap-2">
+                <b><%= U.moneyPlain(it.amount) %></b>
+                <form method="post" action="/payroll/items/<%= it.id %>/delete" data-confirm="حذف شود؟">
+                  <input type="hidden" name="_csrf" value="<%= csrf %>">
+                  <button class="btn btn-sm btn-outline-danger btn-icon"><i class="bi bi-x"></i></button>
+                </form>
+              </span>
+            </li>
+          <% }) %>
+        </ul>
+        <% } %>
+        <div class="p-3 border-top">
+          <form method="post" action="/payroll/row/<%= row.id %>/items" class="row g-2">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <div class="col-5"><input class="form-control form-control-sm" name="label" placeholder="عنوان (مثلاً بن کارکنان)" required></div>
+            <div class="col-3"><input class="form-control form-control-sm" name="amount" placeholder="مبلغ" required></div>
+            <div class="col-3"><select class="form-select form-select-sm" name="kind"><option value="allowance">مزایا (+)</option><option value="deduction">کسور (−)</option></select></div>
+            <div class="col-1"><button class="btn btn-sm btn-primary w-100">+</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

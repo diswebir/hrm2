@@ -1,0 +1,45 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-shield-lock"></i> نقش‌ها و دسترسی‌ها</h1>
+    <div class="subtitle">مدیر سیستم همیشه به همه ماژول‌ها دسترسی دارد</div>
+  </div>
+</div>
+<% if (saved) { %><div class="alert alert-success">دسترسی‌ها ذخیره شد.</div><% } %>
+<div class="accordion" id="rolesAcc">
+  <% rows.forEach(function(r, ri){ const perms = JSON.parse(r.permissions || '[]'); %>
+    <div class="accordion-item">
+      <h2 class="accordion-header">
+        <button class="accordion-button <%= ri ? 'collapsed' : '' %>" type="button" data-bs-toggle="collapse" data-bs-target="#role<%= ri %>">
+          <i class="bi bi-<%= r.name==='hr'?'person-workspace':(r.name==='manager'?'briefcase':'person') %> me-2"></i>
+          <b><%= roleNames[r.name] || r.name %></b>
+          <span class="badge bg-secondary ms-2"><%= U.faNum(userCounts[r.name] || 0) %> کاربر</span>
+          <span class="badge bg-primary-subtle text-primary ms-1"><%= U.faNum(r.name==='admin' ? Object.keys(modules).length : perms.length) %> ماژول فعال</span>
+        </button>
+      </h2>
+      <div id="role<%= ri %>" class="accordion-collapse collapse <%= ri ? '' : 'show' %>" data-bs-parent="#rolesAcc">
+        <div class="accordion-body">
+          <% if (r.name === 'admin') { %>
+            <div class="alert alert-info mb-0">این نقش همیشه دسترسی کامل دارد و قابل تغییر نیست.</div>
+          <% } else { %>
+            <form method="post" action="/roles/<%= r.name %>">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <div class="row">
+                <% Object.entries(modules).forEach(function(kv){ %>
+                  <div class="col-md-4 col-lg-3 mb-2">
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" name="perm_<%= kv[0] %>" value="1" id="p_<%= r.name %>_<%= kv[0] %>" <%= perms.includes(kv[0]) ? 'checked' : '' %>>
+                      <label class="form-check-label" for="p_<%= r.name %>_<%= kv[0] %>" style="font-size:13px"><%= kv[1] %></label>
+                    </div>
+                  </div>
+                <% }) %>
+              </div>
+              <button class="btn btn-primary btn-sm mt-2"><i class="bi bi-check-lg me-1"></i> ذخیره دسترسی‌ها</button>
+            </form>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  <% }) %>
+</div>
+<%- include('../partials/layout_bottom') %>

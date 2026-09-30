@@ -1,0 +1,35 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-person-vcard"></i> دایرکتوری کارکنان</h1>
+    <div class="subtitle"><%= U.faNum(rows.length) %> همکار فعال</div>
+  </div>
+  <form class="d-flex gap-2" method="get" action="/directory">
+    <input type="text" class="form-control form-control-sm" name="q" placeholder="جستجوی نام / سمت / واحد" value="<%= q %>">
+    <select class="form-select form-select-sm" name="dept" style="max-width:180px">
+      <option value="">همه واحدها</option>
+      <% depts.forEach(function(d){ %><option value="<%= d.id %>" <%= dept==String(d.id)?'selected':'' %>><%= d.name %></option><% }) %>
+    </select>
+    <button class="btn btn-sm btn-primary">جستجو</button>
+  </form>
+</div>
+<div class="row g-3">
+  <% rows.forEach(function(e){ %>
+    <div class="col-6 col-md-4 col-xl-3">
+      <a href="/directory/<%= e.id %>" style="text-decoration:none">
+        <div class="card h-100 text-center card-hover">
+          <div class="card-body py-4">
+            <% if (e.photo) { %><img src="/uploads/<%= e.photo %>" class="avatar-lg mb-2" alt="">
+            <% } else { %><span class="avatar-lg mb-2"><%= e.first_name.charAt(0) %></span><% } %>
+            <h6 class="mb-1" style="font-weight:800"><%= e.first_name %> <%= e.last_name %></h6>
+            <div class="text-muted2" style="font-size:12px"><%= e.desig_name || '—' %></div>
+            <div class="text-muted2" style="font-size:11.5px"><%= e.dept_name || '—' %></div>
+            <% if (e.phone) { %><div dir="ltr" style="font-size:12px" class="mt-2 text-primary"><i class="bi bi-telephone"></i> <%= U.faNum(e.phone) %></div><% } %>
+          </div>
+        </div>
+      </a>
+    </div>
+  <% }) %>
+</div>
+<% if (!rows.length) { %><div class="card"><div class="empty-state"><i class="bi bi-search"></i>همکاری یافت نشد.</div></div><% } %>
+<%- include('../partials/layout_bottom') %>

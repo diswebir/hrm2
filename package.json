@@ -1,0 +1,25 @@
+{
+  "name": "hrm-pro",
+  "version": "1.0.0",
+  "description": "سامانه جامع مدیریت منابع انسانی (HRM) - Node.js + SQLite",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "keywords": ["hrm", "hr", "human-resources", "sqlite", "persian", "cpanel"],
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "express-session": "^1.18.1",
+    "helmet": "^7.2.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.16",
+    "sql.js": "^1.12.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

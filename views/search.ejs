@@ -1,0 +1,57 @@
+<%- include('partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-search"></i> نتایج جستجو</h1>
+    <div class="subtitle"><%= q ? 'برای عبارت «' + q + '»' : 'عبارتی وارد نشده' %></div>
+  </div>
+</div>
+<% if (!results) { %>
+  <div class="card"><div class="empty-state"><i class="bi bi-search"></i>حداقل ۲ حرف وارد کنید.</div></div>
+<% } else { %>
+<div class="row g-3">
+  <% if (results.employees.length) { %>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-people"></i> کارکنان (<%= U.faNum(results.employees.length) %>)</div>
+      <ul class="list-group list-group-flush">
+        <% results.employees.forEach(function(e){ %>
+          <li class="list-group-item bg-transparent"><a href="/employees/<%= e.id %>"><%= e.first_name %> <%= e.last_name %></a> <small class="text-muted2">کد <%= U.faNum(e.code) %></small></li>
+        <% }) %>
+      </ul></div></div>
+  <% } %>
+  <% if (results.announcements.length) { %>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-megaphone"></i> اطلاعیه‌ها</div>
+      <ul class="list-group list-group-flush">
+        <% results.announcements.forEach(function(a){ %>
+          <li class="list-group-item bg-transparent"><a href="/announcements/view/<%= a.id %>"><%= a.title %></a></li>
+        <% }) %>
+      </ul></div></div>
+  <% } %>
+  <% if (results.documents.length) { %>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-archive"></i> اسناد</div>
+      <ul class="list-group list-group-flush">
+        <% results.documents.forEach(function(d){ %>
+          <li class="list-group-item bg-transparent"><a href="/documents/<%= d.id %>/edit"><%= d.title %></a></li>
+        <% }) %>
+      </ul></div></div>
+  <% } %>
+  <% if (results.candidates.length) { %>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-person-plus"></i> کاندیداها</div>
+      <ul class="list-group list-group-flush">
+        <% results.candidates.forEach(function(c){ %>
+          <li class="list-group-item bg-transparent"><a href="/candidates/<%= c.id %>"><%= c.name %></a></li>
+        <% }) %>
+      </ul></div></div>
+  <% } %>
+  <% if (results.tickets.length) { %>
+    <div class="col-lg-6"><div class="card h-100"><div class="card-header"><i class="bi bi-life-preserver"></i> تیکت‌ها</div>
+      <ul class="list-group list-group-flush">
+        <% results.tickets.forEach(function(t){ %>
+          <li class="list-group-item bg-transparent"><a href="/tickets/<%= t.id %>"><%= t.subject %></a></li>
+        <% }) %>
+      </ul></div></div>
+  <% } %>
+  <% if (!results.employees.length && !results.announcements.length && !results.documents.length && !results.candidates.length && !results.tickets.length) { %>
+    <div class="col-12"><div class="card"><div class="empty-state"><i class="bi bi-emoji-neutral"></i>نتیجه‌ای یافت نشد.</div></div></div>
+  <% } %>
+</div>
+<% } %>
+<%- include('partials/layout_bottom') %>

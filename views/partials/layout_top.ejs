@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title %> | <%= s.system_name || 'سامانه منابع انسانی' %></title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👥</text></svg>">
+  <link rel="stylesheet" href="/vendor/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="/vendor/bootstrap-icons.css">
+  <link rel="stylesheet" href="/vendor/fonts-vazirmatn/vazirmatn.css">
+  <link rel="stylesheet" href="/css/app.css">
+  <script>
+    (function(){try{var t=localStorage.getItem('hrm-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();
+  </script>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <a class="sb-brand" href="/">
+      <span class="logo"><i class="bi bi-people-fill"></i></span>
+      <span><b><%= s.company_name || 'شرکت من' %></b><small><%= s.system_name || 'سامانه جامع منابع انسانی' %></small></span>
+    </a>
+    <% menu.forEach(function(m){ %>
+      <% if (m.section) { %>
+        <div class="sb-section"><%= m.section %></div>
+        <% m.items.forEach(function(it){ %>
+          <a class="sb-item <%= currentPath.startsWith(it.url) && it.url !== '/' ? 'active' : (it.url === '/' && currentPath === '/' ? 'active' : '') %>" href="<%= it.url %>">
+            <i class="bi <%= it.icon %>"></i><span><%= it.label %></span>
+          </a>
+        <% }) %>
+      <% } else { %>
+        <a class="sb-item <%= currentPath.startsWith(m.url) && m.url !== '/' ? 'active' : (m.url === '/' && currentPath === '/' ? 'active' : '') %>" href="<%= m.url %>">
+          <i class="bi <%= m.icon %>"></i><span><%= m.label %></span>
+        </a>
+      <% } %>
+    <% }) %>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn d-lg-none" id="sidebarToggle" type="button"><i class="bi bi-list"></i></button>
+      <form class="search-box" action="/search" method="get">
+        <i class="bi bi-search"></i>
+        <input type="text" id="globalSearch" name="q" class="form-control form-control-sm" placeholder="جستجو در سامانه... (کلید /)" value="<%= typeof q!=='undefined' && q && q.q ? q.q : '' %>">
+      </form>
+      <div class="me-auto d-flex align-items-center gap-2">
+        <a href="/notifications" class="icon-btn" title="اعلان‌ها">
+          <i class="bi bi-bell"></i>
+          <% if (notifCount > 0) { %><span class="notif-dot"></span><% } %>
+        </a>
+        <button class="icon-btn" id="themeToggle" type="button" title="تغییر تم"><i class="bi bi-moon-stars"></i></button>
+        <div class="dropdown">
+          <a class="user-chip dropdown-toggle" href="#" data-bs-toggle="dropdown">
+            <% if (user && user.photo) { %>
+              <img src="/uploads/<%= user.photo %>" alt="">
+            <% } else { %>
+              <span class="av"><%= user ? (user.name || user.username).charAt(0) : '?' %></span>
+            <% } %>
+            <span class="d-none d-md-inline">
+              <b style="font-size:13px"><%= user ? (user.name || user.username) : '' %></b>
+              <small class="text-muted2 d-block" style="font-size:11px"><%= user ? HH.ROLE_NAMES[user.role] : '' %></small>
+            </span>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-start">
+            <li><a class="dropdown-item" href="/profile"><i class="bi bi-person me-2"></i>پروفایل من</a></li>
+            <li><a class="dropdown-item" href="/change-password"><i class="bi bi-key me-2"></i>تغییر رمز عبور</a></li>
+            <% if (user && (user.role === 'admin' || user.role === 'hr')) { %>
+            <li><a class="dropdown-item" href="/directory"><i class="bi bi-person-vcard me-2"></i>دایرکتوری کارکنان</a></li>
+            <% } %>
+            <li><hr class="dropdown-divider"></li>
+            <li>
+              <form action="/logout" method="post">
+                <input type="hidden" name="_csrf" value="<%= csrf %>">
+                <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-left me-2"></i>خروج</button>
+              </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    <div class="content">

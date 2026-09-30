@@ -1,0 +1,32 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title"><h1><i class="bi bi-life-preserver"></i> <%= title %></h1></div>
+<% if (error) { %><div class="alert alert-danger"><%= error %></div><% } %>
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <form method="post" action="/tickets/new">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <div class="mb-3"><label class="form-label req">موضوع</label>
+            <input class="form-control" name="subject" required placeholder="خلاصه مشکل یا درخواست"></div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6"><label class="form-label">دسته</label>
+              <select class="form-select" name="category">
+                <% Object.entries(categories).forEach(function(kv){ %><option value="<%= kv[0] %>"><%= kv[1] %></option><% }) %></select></div>
+            <div class="col-md-6"><label class="form-label">اولویت</label>
+              <select class="form-select" name="priority">
+                <option value="low">کم</option><option value="normal" selected>متوسط</option>
+                <option value="high">زیاد</option><option value="urgent">فوری</option></select></div>
+          </div>
+          <div class="mb-3"><label class="form-label req">شرح</label>
+            <textarea class="form-control" name="message" rows="5" required placeholder="توضیح کامل مشکل..."></textarea></div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-primary px-4" style="font-weight:700">ثبت تیکت</button>
+            <a class="btn btn-outline-secondary" href="/tickets">انصراف</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

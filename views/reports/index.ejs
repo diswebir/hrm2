@@ -1,0 +1,36 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-bar-chart-line"></i> مرکز گزارش</h1>
+    <div class="subtitle">گزارش‌های تحلیلی با خروجی CSV</div>
+  </div>
+</div>
+<div class="row g-3">
+  <% [
+    ['/reports/headcount', 'ترکیب نیروی انسانی', 'بر اساس دپارتمان، نوع همکاری، جنسیت و شعبه', 'bi-diagram-3'],
+    ['/reports/attendance-summary', 'خلاصه حضور و غیاب', 'کارکرد، غیبت، تأخیر و اضافه‌کاری هر نفر', 'bi-clock-history'],
+    ['/leave/balances', 'مانده مرخصی', 'سقف، مصرف و مانده به‌تفکیک نوع مرخصی', 'bi-calendar2-check'],
+    ['/reports/payroll-cost', 'هزینه حقوق', 'روند ماهانه جمع پرداختی‌ها', 'bi-cash-stack'],
+    ['/reports/expiring', 'موارد در حال انقضا', 'قراردادها و مدارک نزدیک انقضا', 'bi-exclamation-triangle'],
+    ['/reports/birthdays', 'تولدها و مناسبت‌ها', 'تولدهای پیش‌رو بر اساس تقویم شمسی', 'bi-cake2'],
+    ['/reports/performance', 'عملکرد کارکنان', 'میانگین ارزیابی و پیشرفت اهداف', 'bi-graph-up-arrow'],
+    ['/reports/recruitment', 'جذب و استخدام', 'قیف جذب و نرخ تبدیل مراحل', 'bi-person-plus'],
+    ['/reports/training', 'آموزش', 'دوره‌ها، ثبت‌نام‌ها و هزینه‌ها', 'bi-mortarboard'],
+    ['/reports/expenses', 'هزینه‌ها', 'به‌تفکیک دسته و کارمند', 'bi-receipt']
+  ].forEach(function(rp){ %>
+    <div class="col-md-6 col-xl-4">
+      <a href="<%= rp[0] %>" style="text-decoration:none">
+        <div class="card h-100">
+          <div class="card-body d-flex gap-3 align-items-center">
+            <i class="bi <%= rp[3] %>" style="font-size:28px;color:#4f46e5;background:rgba(79,70,229,.1);padding:12px;border-radius:12px"></i>
+            <div>
+              <b><%= rp[1] %></b>
+              <div class="text-muted2" style="font-size:12px"><%= rp[2] %></div>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+  <% }) %>
+</div>
+<%- include('../partials/layout_bottom') %>

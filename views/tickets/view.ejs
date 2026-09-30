@@ -1,0 +1,58 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-life-preserver"></i> <%= t.subject %></h1>
+    <div class="subtitle"><b dir="ltr"><%= t.code %></b> — <%= categories[t.category] || t.category %> — اولویت: <%= U.label(t.priority) %></div>
+  </div>
+  <div class="d-flex gap-2">
+    <% if (t.status !== 'closed') { %>
+      <form method="post" action="/tickets/<%= t.id %>/status">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="hidden" name="status" value="closed">
+        <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-check2-circle me-1"></i> بستن تیکت</button>
+      </form>
+    <% } else if (isStaff || t.user_id === user.id) { %>
+      <form method="post" action="/tickets/<%= t.id %>/status">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="hidden" name="status" value="open">
+        <button class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-counterclockwise me-1"></i> بازگشایی</button>
+      </form>
+    <% } %>
+    <a class="btn btn-outline-secondary btn-sm" href="/tickets">بازگشت</a>
+  </div>
+</div>
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <span class="badge bg-<%= t.status==='open'?'warning text-dark':(t.status==='answered'?'info':'secondary') %> mb-3"><%= U.label(t.status) %></span>
+    <div class="timeline mb-4">
+      <% replies.forEach(function(rp){ %>
+        <div class="tl-item">
+          <div class="card mb-0">
+            <div class="card-header py-2 d-flex justify-content-between" style="font-size:12px">
+              <span>
+                <b><%= rp.username || 'کاربر' %></b>
+                <% if (rp.role === 'admin' || rp.role === 'hr') { %><span class="badge bg-primary ms-1">پشتیبان</span><% } %>
+              </span>
+              <span class="text-muted2"><%= (rp.created_at || '').slice(0,16).replace('T',' ') %></span>
+            </div>
+            <div class="card-body" style="font-size:13.5px;white-space:pre-wrap"><%= rp.message %></div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+    <% if (t.status !== 'closed') { %>
+      <div class="card">
+        <div class="card-body">
+          <form method="post" action="/tickets/<%= t.id %>/reply">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <textarea class="form-control mb-2" name="message" rows="3" placeholder="پاسخ خود را بنویسید..." required></textarea>
+            <button class="btn btn-primary"><i class="bi bi-send me-1"></i> ارسال پاسخ</button>
+          </form>
+        </div>
+      </div>
+    <% } else { %>
+      <div class="alert alert-secondary">این تیکت بسته شده است.</div>
+    <% } %>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

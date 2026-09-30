@@ -1,0 +1,73 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-person"></i> <%= c.name %></h1>
+    <div class="subtitle"><%= c.posting_title %> — منبع: <%= c.source %></div>
+  </div>
+  <div class="d-flex gap-2 flex-wrap">
+    <% if (c.stage === 'hired') { %>
+      <a class="btn btn-success btn-sm" href="/candidates/<%= c.id %>/convert"><i class="bi bi-person-plus-fill me-1"></i> تبدیل به کارمند</a>
+    <% } %>
+    <a class="btn btn-primary btn-sm" href="/candidates/<%= c.id %>/edit"><i class="bi bi-pencil me-1"></i> ویرایش</a>
+    <a class="btn btn-outline-secondary btn-sm" href="/candidates">بازگشت</a>
+  </div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-5">
+    <div class="card mb-3">
+      <div class="card-header"><i class="bi bi-info-circle"></i> اطلاعات</div>
+      <div class="card-body">
+        <table class="table table-sm table-borderless mb-0">
+          <tr><td class="text-muted2" style="width:40%">ایمیل</td><td dir="ltr" style="text-align:right"><%= c.email || '—' %></td></tr>
+          <tr><td class="text-muted2">تلفن</td><td dir="ltr" style="text-align:right"><%= c.phone || '—' %></td></tr>
+          <tr><td class="text-muted2">حقوق انتظاری</td><td><%= U.money(c.expected_salary, s.currency) %></td></tr>
+          <tr><td class="text-muted2">امتیاز</td><td><% for (let i = 1; i <= 5; i++) { %><i class="bi bi-star<%= i<=c.rating?'-fill':'' %> text-warning"></i><% } %></td></tr>
+          <tr><td class="text-muted2">مرحله فعلی</td><td><span class="badge bg-<%= c.stage==='hired'?'success':(c.stage==='rejected'?'danger':'primary') %>"><%= U.label(c.stage) %></span></td></tr>
+          <tr><td class="text-muted2">تاریخ ثبت</td><td><%= U.jDate((c.applied_at || '').slice(0,10)) %></td></tr>
+          <% if (c.resume_path) { %><tr><td class="text-muted2">رزومه</td><td><a href="/files/resume/<%= c.id %>" class="btn btn-sm btn-outline-primary"><i class="bi bi-download me-1"></i> دانلود رزومه</a></td></tr><% } %>
+        </table>
+        <% if (c.note) { %><div class="alert alert-light border mt-2 mb-0" style="font-size:12.5px"><b>یادداشت:</b> <%= c.note %></div><% } %>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><i class="bi bi-arrow-left-right"></i> تغییر مرحله (پیپ‌لاین)</div>
+      <div class="card-body">
+        <form method="post" action="/candidates/<%= c.id %>/stage">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <div class="d-flex gap-2">
+            <select class="form-select" name="stage">
+              <% stages.forEach(function(s){ %><option value="<%= s %>" <%= c.stage===s?'selected':'' %>><%= U.label(s) %></option><% }) %>
+            </select>
+            <button class="btn btn-primary">اعمال</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header"><i class="bi bi-clipboard2-check"></i> مصاحبه‌های کاندیدا</div>
+      <div class="card-body p-0">
+        <% if (!interviews.length) { %><div class="empty-state" style="padding:18px">مصاحبه‌ای ثبت نشده — از بخش «مصاحبه‌ها» برنامه‌ریزی کنید.</div>
+        <% } else { %><div class="table-wrap p-3"><table class="table align-middle">
+          <thead><tr><th>تاریخ</th><th>مصاحبه‌کننده</th><th>نتیجه</th><th>امتیاز</th><th>یادداشت</th></tr></thead>
+          <tbody>
+            <% interviews.forEach(function(i){ %>
+              <tr>
+                <td style="font-size:12.5px"><%= U.jDate(i.date) %> <%= i.time ? U.faNum(i.time) : '' %></td>
+                <td><%= i.first_name ? i.first_name + ' ' + i.last_name : '—' %></td>
+                <td><span class="badge bg-<%= i.result==='passed'?'success':(i.result==='failed'?'danger':'secondary') %>"><%= U.label(i.result) %></span></td>
+                <td><%= i.score ? U.faNum(i.score) : '—' %></td>
+                <td style="font-size:12px;max-width:150px"><%= i.note || '—' %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table></div><% } %>
+        <div class="px-3 pb-3">
+          <a class="btn btn-outline-primary btn-sm" href="/interviews/new"><i class="bi bi-plus-lg me-1"></i> تعیین مصاحبه جدید</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>

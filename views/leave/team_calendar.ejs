@@ -1,0 +1,37 @@
+<%- include('../partials/layout_top', {title: title}) %>
+<div class="page-title">
+  <div>
+    <h1><i class="bi bi-calendar-week"></i> تقویم تیمی مرخصی</h1>
+    <div class="subtitle"><%= monthName %> <%= U.faNum(jy) %> — مرخصی‌های تاییدشده همه کارکنان</div>
+  </div>
+  <form class="d-flex gap-2" method="get" action="/leave/team-calendar">
+    <select class="form-select form-select-sm" name="jm">
+      <% U.FA_MONTHS.forEach(function(m, i){ %><option value="<%= i+1 %>" <%= jm===i+1?'selected':'' %>><%= m %></option><% }) %>
+    </select>
+    <input type="number" class="form-control form-control-sm" name="jy" value="<%= jy %>" style="max-width:100px">
+    <button class="btn btn-sm btn-primary">نمایش</button>
+  </form>
+</div>
+<div class="card p-3">
+  <div class="cal-grid">
+    <% ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'].forEach(function(d){ %><div class="cal-dow"><%= d %></div><% }) %>
+    <%
+      if (days.length) {
+        const g0 = U.toGregorian(days[0].jd.jy, days[0].jd.jm, 1);
+        const firstDow = (new Date(Date.UTC(g0.gy, g0.gm - 1, g0.gd)).getUTCDay() + 1) % 7;
+        for (let x = 0; x < firstDow; x++) { %><div class="cal-cell empty"></div><% }
+      }
+    %>
+    <% days.forEach(function(d){ %>
+      <div class="cal-cell <%= d.weekend ? 'weekend' : '' %> <%= d.holiday ? 'holiday' : '' %>">
+        <div class="cal-day-num"><%= U.faNum(d.jd.jd) %></div>
+        <% if (d.holiday) { %><small class="text-muted2">تعطیل</small><% } %>
+        <% d.list.slice(0, 3).forEach(function(l){ %>
+          <div class="cal-leave" style="background:<%= l.color %>" title="<%= l.first_name %> <%= l.last_name %>"><%= l.first_name %> <%= l.last_name %></div>
+        <% }) %>
+        <% if (d.list.length > 3) { %><small class="text-muted2">+ <%= U.faNum(d.list.length - 3) %> نفر دیگر</small><% } %>
+      </div>
+    <% }) %>
+  </div>
+</div>
+<%- include('../partials/layout_bottom') %>
